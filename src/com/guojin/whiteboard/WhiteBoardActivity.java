@@ -3,8 +3,8 @@ package com.guojin.whiteboard;
 import android.app.Activity;
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.LinearLayout;
 
 import com.guojin.entities.BoardEntity;
 
@@ -50,7 +50,11 @@ public class WhiteBoardActivity extends Activity {
 		float y1 = event.getY(0);
 		float x2 = event.getX(1);
 		float y2 = event.getY(1);
-		return new PointF((x1 + x2) / 2, (y1 + y2) / 2);
+		
+		int[] loc = new int[2];
+		boardView.getLocationOnScreen(loc);
+		
+		return new PointF((x1 + x2) / 2, (y1 + y2) / 2 - loc[1]);
 	}
 	
 	@Override
@@ -63,6 +67,8 @@ public class WhiteBoardActivity extends Activity {
 		// 偏移距离
 		float dx = 0f;
 		float dy = 0f;
+		
+//		Log.d("DevLog", String.format("touch position: %f,%f", event.getX(), event.getY()));
 		
 		if (pointerCount == 2) {
 			switch (event.getActionMasked()) {
@@ -99,7 +105,7 @@ public class WhiteBoardActivity extends Activity {
 				PointF currMidPoint = getMidPoint(event);
 				boardEntity.calculate(currMidPoint.x, currMidPoint.y, scale
 						, dx, dy, boardView.getWidth(), boardView.getHeight());
-				boardView.invalidate();
+				boardView.postInvalidate();
 				
 				
 //				Log.d("DevLog", String.format("Scale: %f\nDist: %f , %f", scale, dx, dy));
@@ -112,6 +118,8 @@ public class WhiteBoardActivity extends Activity {
 				oldMidPoint = getMidPoint(event);
 				break;
 			}
+		} else {
+			boardEntity.onEntityTouchEvent(event);
 		}
 		
 		return false;

@@ -1,8 +1,11 @@
 package com.guojin.entities;
 
+import com.guojin.whiteboard.BoardView;
+
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class BoardEntity {
@@ -27,6 +30,9 @@ public class BoardEntity {
 	
 	// 纸张实体
 	private PaperEntity paperEntity;
+	// 便签实体
+	private NoteEntity noteEntity;
+	
 	/**
 	 * 构造函数
 	 */
@@ -39,6 +45,9 @@ public class BoardEntity {
 		
 		// 初始化纸张实体
 		paperEntity = new PaperEntity(this, PaperEntity.GRID_PAPER);
+		
+		// 初始化便签实体
+		noteEntity = new NoteEntity(this);
 	}
 	
 	/**
@@ -48,8 +57,31 @@ public class BoardEntity {
 	public void draw(Canvas canvas) {
 		// 绘制纸张背景
 		paperEntity.draw(canvas);
+		// 绘制便签
+		noteEntity.draw(canvas);
 		
-		textEntity.draw(canvas);
+//		textEntity.draw(canvas);
+	}
+	
+	/**
+	 * 屏幕触摸方法
+	 * @param event
+	 */
+	public void onEntityTouchEvent(MotionEvent event) {
+		// 将触摸点位置设置为相对View
+		int[] loc = new int[2];
+		mBindedView.getLocationOnScreen(loc);
+		float x = event.getX();
+		float y = event.getY();
+		event.setLocation(x + loc[0], y - loc[1]);
+		noteEntity.onEntityTouchEvent(event);
+	}
+	
+	/**
+	 * 通知View重绘
+	 */
+	public void invalidateView() {
+		mBindedView.invalidate();
 	}
 	
 	/**
@@ -99,6 +131,36 @@ public class BoardEntity {
 	}
 	
 	/**
+	 * 屏幕坐标转换为画板坐标
+	 * @param sx
+	 * @param sy
+	 * @return 数组元素依次为：画板坐标X，画板坐标Y
+	 */
+	public double[] screenToBoardCoodTrans(float sx, float sy) {
+		double bx = sx / totalScale - totalOffsetX;
+		double by = sy / totalScale - totalOffsetY;
+		return new double[] {bx, by};
+	}
+	
+	/**
+	 * 画板上尺寸到屏幕上尺寸的转换
+	 * @param size
+	 * @return
+	 */
+	public float boardToScreenSizeTrans(double bs) {
+		return (float)(bs * totalScale);
+	}
+	
+	/**
+	 * 屏幕上尺寸到画板上尺寸的转换
+	 * @param size
+	 * @return
+	 */
+	public double screenToBoardSizeTrans(float ss) {
+		return ss / totalScale;
+	}
+	
+	/**
 	 * 计算画板参数
 	 * @param smx 屏幕缩放中心点X
 	 * @param smy 屏幕缩放中心点Y
@@ -137,6 +199,6 @@ public class BoardEntity {
 		drawRangeRight = maxX / totalScale - totalOffsetX;
 		drawRangeBottom = maxY / totalScale - totalOffsetY;
 		
-		Log.d("DevLog", String.format("(%f,%f,%f,%f)", drawRangeLeft, drawRangeTop, drawRangeRight, drawRangeBottom));
+//		Log.d("DevLog", String.format("(%f,%f,%f,%f)", drawRangeLeft, drawRangeTop, drawRangeRight, drawRangeBottom));
 	}
 }
