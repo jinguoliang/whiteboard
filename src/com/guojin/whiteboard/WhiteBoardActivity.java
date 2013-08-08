@@ -1,10 +1,13 @@
 package com.guojin.whiteboard;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.AbsoluteLayout;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import com.guojin.entities.BoardEntity;
 
@@ -17,16 +20,19 @@ public class WhiteBoardActivity extends Activity {
 	
 	private BoardView boardView;	// Board View
 	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		boardEntity = new BoardEntity();
+		boardEntity = new BoardEntity(this);
 		boardView = new BoardView(this, boardEntity);
+		// 设置view可以获取焦点
+		boardView.setFocusable(true);
+		boardView.setFocusableInTouchMode(true);
 		boardEntity.bindView(boardView);
+		
 		setContentView(boardView);
-		
-		
 	}
 	
 	/**

@@ -1,12 +1,13 @@
 package com.guojin.entities;
 
-import com.guojin.whiteboard.BoardView;
-
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
+
+import com.guojin.whiteboard.BoardView;
+import com.guojin.whiteboard.WhiteBoardActivity;
 
 public class BoardEntity {
 
@@ -24,7 +25,10 @@ public class BoardEntity {
 	private double drawRangeBottom = 2000;
 	
 	// 绑定的View
-	private View mBindedView = null;
+	private BoardView mBindedView = null;
+	
+	// Context
+	private Context context;
 	
 	private SimpleEntity textEntity;
 	
@@ -36,7 +40,9 @@ public class BoardEntity {
 	/**
 	 * 构造函数
 	 */
-	public BoardEntity() {
+	public BoardEntity(Context c) {
+		
+		context = c;
 		
 		textEntity = new SimpleEntity(this);
 		textEntity.x = 100L;
@@ -47,7 +53,7 @@ public class BoardEntity {
 		paperEntity = new PaperEntity(this, PaperEntity.GRID_PAPER);
 		
 		// 初始化便签实体
-		noteEntity = new NoteEntity(this);
+		noteEntity = new NoteEntity(this, c);
 	}
 	
 	/**
@@ -75,6 +81,14 @@ public class BoardEntity {
 		float y = event.getY();
 		event.setLocation(x + loc[0], y - loc[1]);
 		noteEntity.onEntityTouchEvent(event);
+	}
+	
+	/**
+	 * 获取Context对象
+	 * @return
+	 */
+	public Context getContext() {
+		return context;
 	}
 	
 	/**
@@ -114,7 +128,7 @@ public class BoardEntity {
 	 * 绑定View
 	 * @param v
 	 */
-	public void bindView(View v) {
+	public void bindView(BoardView v) {
 		mBindedView = v;
 	}
 	
