@@ -1,6 +1,5 @@
 package com.guojin.entities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -153,6 +152,31 @@ public class BoardEntity {
 		mBindedView = v;
 	}
 
+	/**
+	 * 提交输入的文本
+	 * @param text 需要提交的文本
+	 * @param isNewLine 是否为新起一行，如果为true，参数text可以为null
+	 */
+	public void commitInputText(String text, boolean isNewLine) {
+		noteEntity.commitInputText(text, isNewLine);
+	}
+	
+	/**
+	 * 删除之前提交的一个文本字符
+	 */
+	public void delPrevInputText() {
+		noteEntity.delPrevInputText();
+	}
+	
+	/**
+	 * 切换软键盘显示
+	 * @param open true-显示    false-关闭
+	 */
+	public void toggleInput(boolean open) {
+		mBindedView.toggleInput(open);
+	}
+	
+	
 	/**
 	 * 画板坐标到屏幕坐标转换
 	 * 
