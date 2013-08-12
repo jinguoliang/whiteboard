@@ -20,10 +20,10 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	private static String TAG = "BoardPicture";
 
 	private BoardEntity boardEntity;
-	float centerX, centerY;// 图片位置以中心位置代表，是在board上的位置
-	float scale;// 相对原图大小的缩放比例 newEdge/oldEdge------------------需要重构--ok
+	double centerXonBoard, centerYonBoard;// 图片位置以中心位置代表，是在board上的位置
+	float scale;// 相对原图大小的缩放比例 newEdge/oldEdge
 	float rotate;// 旋转角度
-	float height, width;// 应该表示原图像的宽高，现在是当前的宽高需要同scale一块重构---ok---原图像宽高
+	float height, width;//原图像宽高
 	private float swidth,sheight;//原图像经board到屏幕缩放后的宽高
 	
 	private Matrix mMatrix;// 对图片进行矩阵变换
@@ -66,8 +66,8 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 		this.mBitmap = b;
 
 		// 初始化
-		this.centerX = x;
-		this.centerY = y;
+		this.centerXonBoard = x;
+		this.centerYonBoard = y;
 		this.scale = 1;
 		this.rotate = 0;
 		this.isFocused = true;
@@ -91,8 +91,8 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	 * @param dy
 	 */
 	public void translate(float dx, float dy) {
-		this.centerX = this.centerX + (dx);
-		this.centerY = this.centerY + (dy);
+		this.centerXonBoard = this.centerXonBoard + (dx);
+		this.centerYonBoard = this.centerYonBoard + (dy);
 		mMatrix.postTranslate(dx, dy);
 	}
 
@@ -200,7 +200,7 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	
 	private void transformFromBoard() {
 		// 转为屏幕上位置坐标
-		center = boardEntity.boardToScreenCoodTrans(this.centerX, this.centerY);
+		center = boardEntity.boardToScreenCoodTrans(this.centerXonBoard, this.centerYonBoard);
 		// 转为屏幕上宽高
 		swidth = boardEntity.boardToScreenSizeTrans(this.width);
 		sheight = boardEntity.boardToScreenSizeTrans(this.height);
