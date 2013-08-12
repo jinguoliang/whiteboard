@@ -5,8 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.view.MotionEvent;
-import android.widget.EditText;
+
+import com.guojin.text.DynamicTextLayout;
+import com.guojin.text.DynamicTextLayout.TextOutSizeListener;
 
 public class NoteEntity implements Entity, HandleTouchEvent {
 
@@ -23,7 +26,7 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	private double noteHeight = 300;
 	
 	// 内边距
-	private double padding = 20;
+	private double padding = 10;
 	
 	// 阴影参数
 	private float shadowRadius = 3;
@@ -44,12 +47,16 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	
 	// 移动指示器高度
 	private double moveIndicateHeight = 30;
-	
 	// 大小控制指示器尺寸 
-	private double resizeIndicateSize = 30;
-	
+	private double resizeIndicateSize = 20;
+	// 删除指示器尺寸
+	private double delIndicateSize = 30;
+	// 删除指示器的笔画宽度
+	private double delIndicateStrokeWidth = 2;
 	// 文本尺寸
 	private float boardTextSize = 20;
+	
+	
 	
 	// 背景画笔
 	private Paint bgPaint;
@@ -57,14 +64,15 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	private Paint resizeIndicatePaint;
 	// 移动指示器画笔
 	private Paint moveIndicatePaint;
-	// 文本画笔
-	private Paint textPaint;
-	
-	// 文本
-	private String contentText = "";
+	// 删除指示器画笔
+	private Paint delIndicatePaint;
 	
 	private BoardEntity boardEntity;
 	private Context context;
+	private DynamicTextLayout textLayout;
+	
+	// 文本字间距
+	private double textSpan = 1;
 	
 	public NoteEntity(BoardEntity be, Context c) {
 		boardEntity = be;
@@ -79,8 +87,7 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 		// 初始化大小控制指示器画笔
 		resizeIndicatePaint = new Paint();
 		resizeIndicatePaint.setAntiAlias(true);
-		resizeIndicatePaint.setStrokeWidth(1);
-		resizeIndicatePaint.setColor(Color.WHITE);
+		resizeIndicatePaint.setColor(Color.argb(200, 255, 193, 37));
 		
 		// 初始化位置指示器画笔
 		moveIndicatePaint = new Paint();
@@ -88,11 +95,26 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 		moveIndicatePaint.setStrokeWidth(2);
 		moveIndicatePaint.setColor(Color.argb(200, 100, 100, 100));
 		
-		// 初始化文本画笔
-		textPaint = new Paint();
-		textPaint.setAntiAlias(true);
-		textPaint.setColor(Color.BLACK);
+		// 初始化删除指示器画笔
+		delIndicatePaint = new Paint();
+		delIndicatePaint.setAntiAlias(true);
+		delIndicatePaint.setColor(Color.rgb(238, 44, 44));
 		
+		// 初始化文本显示
+		PointF sp = boardEntity.boardToScreenCoodTrans(boardX, boardY);
+		float lw = boardEntity.boardToScreenSizeTrans(noteWidth);
+		float lh = boardEntity.boardToScreenSizeTrans(noteHeight);
+		textLayout = new DynamicTextLayout(sp.x, sp.y, lw, lh);
+		// 设置当文字超出边界范围时的监听器
+		textLayout.setOnTextOutSizeListener(new TextOutSizeListener() {
+			
+			@Override
+			public void onSizeChange(float w, float h) {
+				noteWidth = boardEntity.screenToBoardSizeTrans(w);
+				noteHeight = boardEntity.screenToBoardSizeTrans(h);
+				boardEntity.invalidateView();
+			}
+		});
 		
 	}
 	
@@ -112,6 +134,8 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 		// 阴影尺寸
 		float ssx = boardEntity.boardToScreenSizeTrans(shadowX);
 		float ssy = boardEntity.boardToScreenSizeTrans(shadowY);
+		// 内边距
+		float spadding = boardEntity.boardToScreenSizeTrans(padding);
 		
 		// 绘制背景
 		bgPaint.setShadowLayer(shadowRadius, ssx, ssy, shadowColor);
@@ -121,8 +145,37 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 		if (isShowSizeIndicate) {
 			drawMoveIndicate(canvas);
 			drawResizeIndicate(canvas);
+			drawDelIndicate(canvas);
 		}
 		
+		// 绘制文本
+		textLayout.resize(sp.x + spadding, sp.y + spadding
+				, sw - spadding * 2, sh - spadding * 2);
+		float stextSize = boardEntity.boardToScreenSizeTrans(boardTextSize);
+		float stextSpan = boardEntity.boardToScreenSizeTrans(textSpan);
+		textLayout.setTextSize(stextSize);
+		textLayout.setSpan(stextSpan);
+		textLayout.draw(canvas);
+	}
+	
+	/**
+	 * 提交输入的文本
+	 * @param text 需要提交的文本
+	 * @param isNewLine 是否为新起一行，如果为true，参数text可以为null
+	 */
+	public void commitInputText(String text, boolean isNewLine) {
+		if (isNewLine) {
+			textLayout.nextNewLine();
+		} else {
+			textLayout.appendText(text);
+		}
+	}
+	
+	/**
+	 * 删除之前提交的一个文本字符
+	 */
+	public void delPrevInputText() {
+		textLayout.delPrev();
 	}
 	
 	/**
@@ -160,19 +213,50 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	 */
 	private void drawResizeIndicate(Canvas canvas) {
 		
-		float l = boardEntity.boardToScreenSizeTrans(resizeIndicateSize);
+		float r = boardEntity.boardToScreenSizeTrans(resizeIndicateSize);
 		PointF rbp = boardEntity.boardToScreenCoodTrans(boardX + noteWidth, boardY + noteHeight);
 		
 		// 绘制斜线用于标明指示区域
-		float d = l / 5;
-		for (int i = 1; i <= 4; i++) {
-			canvas.drawLine(rbp.x - l + d * i + 1, rbp.y - 1, rbp.x - 1, rbp.y - l + d * i + 1, resizeIndicatePaint);
-		}
+		canvas.drawCircle(rbp.x, rbp.y, r, resizeIndicatePaint);
 		
+	}
+	
+	/**
+	 * 绘制删除指示器
+	 * @param canvas
+	 */
+	private void drawDelIndicate(Canvas canvas) {
+		float ss = boardEntity.boardToScreenSizeTrans(delIndicateSize);
+		PointF sp = boardEntity.boardToScreenCoodTrans(boardX, boardY);
+		float sw = boardEntity.boardToScreenSizeTrans(noteWidth);
+		float ssw = boardEntity.boardToScreenSizeTrans(delIndicateStrokeWidth);
+		// 保存画笔原参数
+		int oldColor = delIndicatePaint.getColor();
+		
+		RectF delRect = new RectF(sp.x + sw, sp.y
+				, sp.x + sw + ss, sp.y + ss);
+		canvas.drawRect(delRect, delIndicatePaint);
+		
+		// 圆形标识的中心点
+		float scdx = sp.x + sw + ss / 2;
+		float scdy = sp.y + ss / 2;
+		float scdd = ss / 3;
+		delIndicatePaint.setColor(Color.WHITE);
+		delIndicatePaint.setStrokeWidth(ssw);
+		canvas.drawLine(scdx - scdd, scdy - scdd, scdx + scdd, scdy + scdd, delIndicatePaint);
+		canvas.drawLine(scdx - scdd, scdy + scdd, scdx + scdd, scdy - scdd, delIndicatePaint);
+		
+		// 恢复画笔
+		delIndicatePaint.setColor(oldColor);
 	}
 	
 	@Override
 	public void onEntityTouchEvent(MotionEvent event) {
+		
+		// 将点击事件传入
+		if (isShowSizeIndicate) {
+			textLayout.onTouchEvent(event);
+		}
 		
 		switch (event.getAction()) {
 		
@@ -189,7 +273,9 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 					isMoveable = false;
 					isResizeable = false;
 				} else {
-//					boardEntity.openInput();
+					// 开启文本输入
+					boardEntity.toggleInput(true);
+					textLayout.showCursor(true);
 				}
 			}
 			
@@ -209,6 +295,9 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 			
 			if (!isInNoteRange(oldX, oldY) && !isMoveable && !isResizeable) {
 				isShowSizeIndicate = false;
+				// 关闭输入法显示
+				boardEntity.toggleInput(false);
+				textLayout.showCursor(false);
 			}
 			
 			boardEntity.invalidateView();
@@ -271,6 +360,7 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 					oldX = event.getX();
 					oldY = event.getY();
 					boardEntity.invalidateView();
+					
 				}
 			}
 			
@@ -320,12 +410,10 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	 * @return
 	 */
 	private boolean isInResizeIndicRange(float sx, float sy) {
-		double exSize = 10;
 		double[] bp = boardEntity.screenToBoardCoodTrans(sx, sy);
-		if (bp[0] > boardX + noteWidth - resizeIndicateSize - exSize 
-				&& bp[0] < boardX + noteWidth + exSize
-				&& bp[1] > boardY + noteHeight - resizeIndicateSize - exSize 
-				&& bp[1] < boardY + noteHeight + exSize) {
+		double a = Math.abs(bp[0] - (boardX + noteWidth)) * Math.abs(bp[0] - (boardX + noteWidth));
+		double b = Math.abs(bp[1] - (boardY + noteHeight)) * Math.abs(bp[1] - (boardY + noteHeight));
+		if (Math.sqrt(a + b) < resizeIndicateSize) {
 			return true;
 		}
 		return false;

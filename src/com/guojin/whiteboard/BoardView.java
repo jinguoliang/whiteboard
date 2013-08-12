@@ -5,10 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.view.Display;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 
 import com.guojin.entities.BoardEntity;
 
@@ -20,7 +23,8 @@ public class BoardView extends View {
 	// 画板实体
 	private BoardEntity boardEntity = null; 
 	
-	private View layout;
+	private InputMethodManager imm;
+//	private View layout;
 	
 	
 	public BoardView(Context context) {
@@ -41,18 +45,63 @@ public class BoardView extends View {
 		bufBitmap = Bitmap.createBitmap(screenWidth, screenHeight, Config.ARGB_8888);
 		bufCanvas = new Canvas(bufBitmap);
 		
-		LayoutInflater inflater = LayoutInflater.from(boardEntity.getContext());
-		layout = (LinearLayout)inflater.inflate(R.layout.entity_note, null);
+//		LayoutInflater inflater = LayoutInflater.from(boardEntity.getContext());
+//		layout = (LinearLayout)inflater.inflate(R.layout.entity_note, null);
+		imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+	}
+	
+	/**
+	 * 切换软键盘显示
+	 * @param open true-显示    false-关闭
+	 */
+	public void toggleInput(boolean open) {
+		if (open) {
+			imm.showSoftInput(this, InputMethodManager.SHOW_FORCED);
+		} else {
+			imm.hideSoftInputFromWindow(getWindowToken(), 0);
+		}
 	}
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		
 		boardEntity.draw(bufCanvas);
-		layout.draw(canvas);
+//		layout.draw(canvas);
 		
 		canvas.drawBitmap(bufBitmap, 0, 0, null);
 		super.onDraw(canvas);
 	}
 
+	@Override
+	public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+		return new MyInputConnection(this, false);
+	}
+	
+	class MyInputConnection extends BaseInputConnection {
+
+		public MyInputConnection(View targetView, boolean fullEditor) {
+			super(targetView, fullEditor);
+		}
+		
+		@Override
+		public boolean commitText(CharSequence text, int newCursorPosition) {
+			boardEntity.commitInputText(text.toString(), false);
+			invalidate();
+			return true;
+		}
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		switch (keyCode) {
+		case KeyEvent.KEYCODE_ENTER:
+			boardEntity.commitInputText(null, true);
+			break;
+		case KeyEvent.KEYCODE_DEL:
+			boardEntity.delPrevInputText();
+			break;
+		}
+		invalidate();
+		return false;
+	}
 }
