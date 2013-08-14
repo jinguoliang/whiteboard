@@ -397,13 +397,32 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	}
 
 	private void computeScale(float x, float y,int vertex) {
-		float ddx = x - this.center.x;
-		float ddy = y - this.center.y;
+		float ddx = 0,ddy = 0;
+		
+		switch (vertex) {
+		case PictureEntity.a_right_bottom:
+			ddx = x - this.center.x+this.swidth/2;
+			ddy = y - this.center.y+this.sheight/2;
+			break;
+		case PictureEntity.a_right_top:
+			ddx = x - this.center.x+this.swidth/2;
+			ddy = y - this.center.y-this.sheight/2;
+			break;
+		case PictureEntity.a_left_bottom:
+			ddx = x - this.center.x-this.swidth/2;
+			ddy = y - this.center.y+this.sheight/2;
+			break;
+		case PictureEntity.a_left_top:
+			ddx = x - this.center.x-this.swidth/2;
+			ddy = y - this.center.y-this.sheight/2;
+			break;
+
+		}
 		float d1 = (float) Math.sqrt(Math.pow(ddx, 2) + Math.pow(ddy, 2));
-		float d2 = (float) Math.sqrt(Math.pow(this.swidth / 2, 2)
-				+ Math.pow(this.sheight / 2, 2));
+		float d2 = (float) Math.sqrt(Math.pow(this.swidth, 2)
+				+ Math.pow(this.sheight, 2));
 		float tmp=scale;
-		scale = (d2+(d1-d2)/2)/ d2;
+		scale = d1/ d2;
 		
 		// 中心偏移的距离
 		double dl = (float) Math.sqrt(Math.pow(
