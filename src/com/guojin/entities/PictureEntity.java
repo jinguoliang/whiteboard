@@ -23,9 +23,9 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	double centerXonBoard, centerYonBoard;// 图片位置以中心位置代表，是在board上的位置
 	float scale;// 相对原图大小的缩放比例 newEdge/oldEdge
 	float rotate;// 旋转角度
-	float height, width;//原图像宽高
-	private float swidth,sheight;//原图像经board到屏幕缩放后的宽高
-	
+	float height, width;// 原图像宽高
+	private float swidth, sheight;// 原图像经board到屏幕缩放后的宽高
+
 	private Matrix mMatrix;// 对图片进行矩阵变换
 	private Matrix bMatrix;
 	private Bitmap mBitmap;
@@ -36,8 +36,8 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	private int touchWherre;// 记录触摸的位置
 	private float touchPointFSize = 30;
 	private float sTouchPointFSize = 30;
-	private float strokWidth=5;
-	private float sStrokWidth=5;
+	private float strokWidth = 5;
+	private float sStrokWidth = 5;
 	// 当前四个顶点位置 中心位置 顶部位置
 	private PointF sltp;
 	private PointF srtp;
@@ -45,12 +45,16 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	private PointF slbp;
 	private PointF stopp;
 	private PointF center;
-	
+
+	// 触点当前位置和按下位置
 	private float cx;
 	private float cy;
 	private float sx;
 	private float sy;
 
+	// 因缩放而使中心点产生的偏移
+	private float dx = 0;
+	private float dy = 0;
 
 	// 触摸位置标记
 	final static int a_left_top = 0;
@@ -80,6 +84,7 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 		boxPaint.setColor(Color.RED);
 		boxPaint.setStrokeJoin(Paint.Join.ROUND);
 		boxPaint.setStrokeCap(Paint.Cap.ROUND);
+		boxPaint.setAntiAlias(true);
 
 		mMatrix = new Matrix();
 	}
@@ -106,6 +111,7 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 
 		// 定制画笔并画出控制点
 		Paint p = new Paint();
+		p.setAntiAlias(true);
 		p.setColor(Color.RED);
 		c.drawCircle(sltp.x, sltp.y, sTouchPointFSize, p);
 		c.drawCircle(slbp.x, slbp.y, sTouchPointFSize, p);
@@ -173,60 +179,84 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 	}
 
 	private void transform() {
-		//把画板坐标转换为屏幕坐标
+		// 把画板坐标转换为屏幕坐标
 		transformFromBoard();
-		
+
 		// 缩放
 		float width = this.swidth * scale;
 		float height = this.sheight * scale;
+		float x = this.center.x;
+		float y = this.center.y;
 
 		// 获取当前控制点的位置
-		float dx = width / 2 + sStrokWidth/2;
-		float dy = height / 2 + sStrokWidth/2;
-		sltp = new PointF(center.x - dx, center.y - dy);
-		srtp = new PointF(center.x + dx, center.y - dy);
-		srbp = new PointF(center.x + dx, center.y + dy);
-		slbp = new PointF(center.x - dx, center.y + dy);
-		stopp = new PointF(center.x, center.y - dy);
+		float tmpx = width / 2 + sStrokWidth / 2;
+		float tmpy = height / 2 + sStrokWidth / 2;
+		sltp = new PointF(x - tmpx, y - tmpy);
+		srtp = new PointF(x + tmpx, y - tmpy);
+		srbp = new PointF(x + tmpx, y + tmpy);
+		slbp = new PointF(x - tmpx, y + tmpy);
+		stopp = new PointF(x, y - tmpy);
 
 		// 添加角度变换
-		sltp = rotatePointF(center.x, center.y, sltp.x, sltp.y, this.rotate);
-		srbp = rotatePointF(center.x, center.y, srbp.x, srbp.y, this.rotate);
-		slbp = rotatePointF(center.x, center.y, slbp.x, slbp.y, this.rotate);
-		srtp = rotatePointF(center.x, center.y, srtp.x, srtp.y, this.rotate);
-		stopp = rotatePointF(center.x, center.y, stopp.x, stopp.y, this.rotate);
+		sltp = rotatePointF(x, y, sltp.x, sltp.y, this.rotate);
+		srbp = rotatePointF(x, y, srbp.x, srbp.y, this.rotate);
+		slbp = rotatePointF(x, y, slbp.x, slbp.y, this.rotate);
+		srtp = rotatePointF(x, y, srtp.x, srtp.y, this.rotate);
+		stopp = rotatePointF(x, y, stopp.x, stopp.y, this.rotate);
+
+		// 修正偏移
+		sltp.x += dx;
+		sltp.y += dy;
+		srbp.x += dx;
+		srbp.y += dy;
+		slbp.x += dx;
+		slbp.y += dy;
+		srtp.x += dx;
+		srtp.y += dy;
+		stopp.x += dx;
+		stopp.y += dy;
+		center.x += dx;
+		center.y += dy;
+
 
 	}
-	
+
 	private void transformFromBoard() {
 		// 转为屏幕上位置坐标
-		center = boardEntity.boardToScreenCoodTrans(this.centerXonBoard, this.centerYonBoard);
+		center = boardEntity.boardToScreenCoodTrans(this.centerXonBoard,
+				this.centerYonBoard);
 		// 转为屏幕上宽高
 		swidth = boardEntity.boardToScreenSizeTrans(this.width);
 		sheight = boardEntity.boardToScreenSizeTrans(this.height);
 
-		//操作框边的宽度，控制点的大小
+		// 操作框边的宽度，控制点的大小
 		sStrokWidth = boardEntity.boardToScreenSizeTrans(this.strokWidth);
-		sTouchPointFSize =  boardEntity.boardToScreenSizeTrans(this.touchPointFSize);
+		sTouchPointFSize = boardEntity
+				.boardToScreenSizeTrans(this.touchPointFSize);
 
-		
-		//对图片随board进行缩放
+		// 对图片随board进行缩放
 		bMatrix = new Matrix();
-		bMatrix.setScale((float)boardEntity.getTotalScale(), (float)boardEntity.getTotalScale());
+		bMatrix.setScale((float) boardEntity.getTotalScale(),
+				(float) boardEntity.getTotalScale());
 	}
 
 	private void drawBitmap(Canvas c) {
+		Paint p = new Paint();
+		p.setAntiAlias(true);
 		transformBitmapMatrix();
-		c.drawBitmap(mBitmap, mMatrix, null);
+		c.drawBitmap(mBitmap, mMatrix, p);
 	}
 
 	private void transformBitmapMatrix() {
+		float x = center.x - dx;
+		float y = center.y - dy;
+
 		mMatrix.reset();
 		mMatrix.postConcat(bMatrix);
-		mMatrix.postTranslate(center.x - this.swidth / 2, this.center.y
-				- this.sheight / 2);
-		mMatrix.postScale(this.scale, this.scale, this.center.x, this.center.y);
-		mMatrix.postRotate(this.rotate, this.center.x, this.center.y);
+		mMatrix.postTranslate(x - this.swidth / 2, y - this.sheight / 2);
+		mMatrix.postScale(this.scale, this.scale, x, y);
+		mMatrix.postRotate(this.rotate, x, y);
+		mMatrix.postTranslate(dx, dy);
 	}
 
 	// 通过uri获得bitmap
@@ -336,7 +366,7 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 			case a_right_top:
 			case a_left_bottom:
 			case a_right_bottom:
-				computeScale(x, y);
+				computeScale(x, y,touchWherre);
 				break;
 			case a_rotate_handle:
 
@@ -360,18 +390,42 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 				int sign = isOnLeftHand(center, new PointF(sx, sy), x, y) == true ? 1
 						: -1;
 				this.rotate += dAngle * sign;
+
 				break;
 			}
 		}
 	}
 
-	private void computeScale(float x, float y) {
-		float dx = x - this.center.x;
-		float dy = y - this.center.y;
-		float d1 = (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+	private void computeScale(float x, float y,int vertex) {
+		float ddx = x - this.center.x;
+		float ddy = y - this.center.y;
+		float d1 = (float) Math.sqrt(Math.pow(ddx, 2) + Math.pow(ddy, 2));
 		float d2 = (float) Math.sqrt(Math.pow(this.swidth / 2, 2)
 				+ Math.pow(this.sheight / 2, 2));
-		scale = d1 / d2;
+		float tmp=scale;
+		scale = (d2+(d1-d2)/2)/ d2;
+		
+		// 中心偏移的距离
+		double dl = (float) Math.sqrt(Math.pow(
+				(this.scale * this.swidth - this.swidth*tmp) / 2, 2)
+				+ Math.pow((this.scale * this.sheight - this.sheight*tmp) / 2, 2));
+		//中点与左上角连线与ｘ轴正向的夹角角度
+		double wangle ;
+		if (vertex==PictureEntity.a_left_top||vertex==PictureEntity.a_right_bottom) {
+			wangle = -Math.toRadians(this.rotate)
+					+ (Math.atan(this.width / this.height)) + Math.toRadians(90);
+		}else{
+			wangle = -Math.toRadians(this.rotate)
+					- (Math.atan(this.width / this.height)) + Math.toRadians(90);
+		}
+		float sign=scale>tmp?1:-1;
+		if (vertex==PictureEntity.a_left_top||vertex==PictureEntity.a_right_top) {
+			dx += (float) (Math.cos(wangle) * dl)*sign;
+			dy += -(float) (Math.sin(wangle) * dl)*sign;
+		}else{
+			dx += -(float) (Math.cos(wangle) * dl)*sign;
+			dy += (float) (Math.sin(wangle) * dl)*sign;
+		}
 	}
 
 	/**
