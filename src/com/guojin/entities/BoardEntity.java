@@ -8,7 +8,6 @@ import android.view.MotionEvent;
 
 import com.guojin.whiteboard.BoardView;
 import com.guojin.whiteboard.R;
-import com.guojin.whiteboard.WhiteBoardActivity;
 
 public class BoardEntity {
 

@@ -1,13 +1,17 @@
 package com.guojin.whiteboard;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.view.MotionEvent;
-import android.widget.AbsoluteLayout;
-import android.widget.EditText;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.guojin.entities.BoardEntity;
 
@@ -20,6 +24,13 @@ public class WhiteBoardActivity extends Activity {
 	
 	private BoardView boardView;	// Board View
 	
+	private RadioGroup modeSelectGroup;		// 模式单选组
+	private RadioGroup handDrawModeConfGroup;		// 手绘模式配置单选组
+	private RadioGroup noteModeConfGroup;		// 便签模式总配置单选组
+	private RadioGroup noteStyleConfGroup;		// 便签样式配置单选组
+	private LinearLayout noteTextSizeConfLayout;	// 便签字体大小配置Layout
+	private TextView noteTextSizeTxt;		// 便签字体大小显示
+	private SeekBar noteTextSizeSeekbar;	// 便签字体调整
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +43,78 @@ public class WhiteBoardActivity extends Activity {
 		boardView.setFocusableInTouchMode(true);
 		boardEntity.bindView(boardView);
 		
-		setContentView(boardView);
+		// 向布局中添加boardview
+		FrameLayout layout = (FrameLayout)getLayoutInflater().inflate(R.layout.activity_whiteboard, null);
+		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		boardView.setLayoutParams(lp);
+		layout.addView(boardView, 0);
+		
+		setContentView(layout);
+		
+		// 初始化控件
+		modeSelectGroup = (RadioGroup)findViewById(R.id.modesel_group);
+		handDrawModeConfGroup = (RadioGroup)findViewById(R.id.handdraw_conf_bar);
+		noteModeConfGroup = (RadioGroup)findViewById(R.id.note_conf_group);
+		noteStyleConfGroup = (RadioGroup)findViewById(R.id.note_style_group);
+		noteTextSizeConfLayout = (LinearLayout)findViewById(R.id.note_textsize_layout);
+		noteTextSizeTxt = (TextView)findViewById(R.id.note_textsize_txt);
+		noteTextSizeSeekbar = (SeekBar)findViewById(R.id.note_textsize_sbar);
+		
+		// 模式选择监听器
+		modeSelectGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				switch (group.getCheckedRadioButtonId()) {
+				case R.id.handdraw_btn:
+					// 手绘模式
+					handDrawModeConfGroup.setVisibility(View.VISIBLE);
+					noteModeConfGroup.setVisibility(View.GONE);
+					noteStyleConfGroup.setVisibility(View.GONE);
+					noteTextSizeConfLayout.setVisibility(View.GONE);
+					
+					break;
+				case R.id.picdraw_btn:
+					// 图片模式
+					handDrawModeConfGroup.setVisibility(View.GONE);
+					noteModeConfGroup.setVisibility(View.GONE);
+					noteStyleConfGroup.setVisibility(View.GONE);
+					noteTextSizeConfLayout.setVisibility(View.GONE);
+					
+					break;
+				case R.id.notedraw_btn:
+					// 便签模式
+					handDrawModeConfGroup.setVisibility(View.GONE);
+					noteModeConfGroup.setVisibility(View.VISIBLE);
+					noteStyleConfGroup.setVisibility(View.GONE);
+					noteTextSizeConfLayout.setVisibility(View.GONE);
+					
+					break;
+				}
+			}
+		});
+		
+		// 便签配置选择监听器
+		noteModeConfGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				switch (group.getCheckedRadioButtonId()) {
+				case R.id.note_conf_style:
+					// 便签样式配置
+					noteStyleConfGroup.setVisibility(View.VISIBLE);
+					noteTextSizeConfLayout.setVisibility(View.GONE);
+					
+					break;
+				case R.id.note_conf_textsize:
+					// 便签字体大小配置
+					noteStyleConfGroup.setVisibility(View.GONE);
+					noteTextSizeConfLayout.setVisibility(View.VISIBLE);
+					
+					break;
+				}
+			}
+		});
 	}
 	
 	/**

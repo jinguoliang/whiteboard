@@ -1,6 +1,7 @@
 package com.guojin.entities;
 
 import android.graphics.Canvas;
+import android.view.MotionEvent;
 
 public interface Entity {
 	/**
@@ -8,4 +9,5 @@ public interface Entity {
 	 * @param canvas
 	 */
 	public void draw(Canvas canvas);
+	
 }
