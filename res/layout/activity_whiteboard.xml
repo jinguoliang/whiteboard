@@ -50,7 +50,7 @@
     </RadioGroup>
     
     <!-- 便签模式底部参数选择条 -->
-    <RadioGroup android:id="@+id/note_conf_group"
+    <LinearLayout android:id="@+id/note_conf_layout"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -59,21 +59,23 @@
         android:padding="5dp"
         android:background="@drawable/footerbar_bg" >
         
-        <RadioButton android:id="@+id/note_conf_style"
+        <ToggleButton android:id="@+id/note_conf_style_btn"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:button="@null"
             android:layout_marginRight="5dp"
+            android:textOn=""
+            android:textOff=""
             android:background="@drawable/handdraw_btn"/>
         
-        <RadioButton android:id="@+id/note_conf_textsize"
+        <ToggleButton android:id="@+id/note_conf_textsize_btn"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:button="@null"
             android:layout_marginRight="5dp"
+            android:textOn=""
+            android:textOff=""
             android:background="@drawable/handdraw_btn"/>
         
-    </RadioGroup>
+    </LinearLayout>
     
     <!-- 便签模式底部样式参数选择条 -->
     <RadioGroup android:id="@+id/note_style_group"

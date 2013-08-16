@@ -43,9 +43,9 @@ public final class R {
         public static final int handdraw_btn=0x7f070002;
         public static final int handdraw_conf_bar=0x7f070005;
         public static final int modesel_group=0x7f070001;
-        public static final int note_conf_group=0x7f070006;
-        public static final int note_conf_style=0x7f070007;
-        public static final int note_conf_textsize=0x7f070008;
+        public static final int note_conf_layout=0x7f070006;
+        public static final int note_conf_style_btn=0x7f070007;
+        public static final int note_conf_textsize_btn=0x7f070008;
         public static final int note_style_blue=0x7f07000a;
         public static final int note_style_green=0x7f07000c;
         public static final int note_style_group=0x7f070009;

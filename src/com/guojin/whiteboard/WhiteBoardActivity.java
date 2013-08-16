@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.LinearLayout;
@@ -12,6 +13,7 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.guojin.entities.BoardEntity;
 
@@ -26,11 +28,17 @@ public class WhiteBoardActivity extends Activity {
 	
 	private RadioGroup modeSelectGroup;		// 模式单选组
 	private RadioGroup handDrawModeConfGroup;		// 手绘模式配置单选组
-	private RadioGroup noteModeConfGroup;		// 便签模式总配置单选组
+	
+	private LinearLayout noteModeConfLayout;		// 便签模式总配置Layout
+	private ToggleButton noteTextSizeBtn;	// 便签字体大小设置按钮
+	private ToggleButton noteStyleBtn;		// 便签样式设置按钮
+	
 	private RadioGroup noteStyleConfGroup;		// 便签样式配置单选组
+	
 	private LinearLayout noteTextSizeConfLayout;	// 便签字体大小配置Layout
 	private TextView noteTextSizeTxt;		// 便签字体大小显示
 	private SeekBar noteTextSizeSeekbar;	// 便签字体调整
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +60,15 @@ public class WhiteBoardActivity extends Activity {
 		setContentView(layout);
 		
 		// 初始化控件
+		// 模式选择
 		modeSelectGroup = (RadioGroup)findViewById(R.id.modesel_group);
 		handDrawModeConfGroup = (RadioGroup)findViewById(R.id.handdraw_conf_bar);
-		noteModeConfGroup = (RadioGroup)findViewById(R.id.note_conf_group);
+		
+		// 便签模式设置
+		noteModeConfLayout = (LinearLayout)findViewById(R.id.note_conf_layout);
+		noteTextSizeBtn = (ToggleButton)findViewById(R.id.note_conf_textsize_btn);
+		noteStyleBtn = (ToggleButton)findViewById(R.id.note_conf_style_btn);
+		
 		noteStyleConfGroup = (RadioGroup)findViewById(R.id.note_style_group);
 		noteTextSizeConfLayout = (LinearLayout)findViewById(R.id.note_textsize_layout);
 		noteTextSizeTxt = (TextView)findViewById(R.id.note_textsize_txt);
@@ -69,7 +83,7 @@ public class WhiteBoardActivity extends Activity {
 				case R.id.handdraw_btn:
 					// 手绘模式
 					handDrawModeConfGroup.setVisibility(View.VISIBLE);
-					noteModeConfGroup.setVisibility(View.GONE);
+					noteModeConfLayout.setVisibility(View.GONE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);
 					
@@ -77,7 +91,7 @@ public class WhiteBoardActivity extends Activity {
 				case R.id.picdraw_btn:
 					// 图片模式
 					handDrawModeConfGroup.setVisibility(View.GONE);
-					noteModeConfGroup.setVisibility(View.GONE);
+					noteModeConfLayout.setVisibility(View.GONE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);
 					
@@ -85,33 +99,41 @@ public class WhiteBoardActivity extends Activity {
 				case R.id.notedraw_btn:
 					// 便签模式
 					handDrawModeConfGroup.setVisibility(View.GONE);
-					noteModeConfGroup.setVisibility(View.VISIBLE);
+					noteModeConfLayout.setVisibility(View.VISIBLE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);
+					noteStyleBtn.setChecked(false);
+					noteTextSizeBtn.setChecked(false);
 					
 					break;
 				}
 			}
 		});
 		
-		// 便签配置选择监听器
-		noteModeConfGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		// 便签字体设置按钮监听
+		noteTextSizeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			
 			@Override
-			public void onCheckedChanged(RadioGroup group, int checkedId) {
-				switch (group.getCheckedRadioButtonId()) {
-				case R.id.note_conf_style:
-					// 便签样式配置
-					noteStyleConfGroup.setVisibility(View.VISIBLE);
-					noteTextSizeConfLayout.setVisibility(View.GONE);
-					
-					break;
-				case R.id.note_conf_textsize:
-					// 便签字体大小配置
-					noteStyleConfGroup.setVisibility(View.GONE);
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					noteStyleBtn.setChecked(false);
 					noteTextSizeConfLayout.setVisibility(View.VISIBLE);
-					
-					break;
+				} else {
+					noteTextSizeConfLayout.setVisibility(View.GONE);
+				}
+			}
+		});
+		
+		// 便签样式设置按钮监听
+		noteStyleBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					noteTextSizeBtn.setChecked(false);
+					noteStyleConfGroup.setVisibility(View.VISIBLE);
+				} else {
+					noteStyleConfGroup.setVisibility(View.GONE);
 				}
 			}
 		});
