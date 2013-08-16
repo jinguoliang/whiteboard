@@ -4,11 +4,169 @@
     android:layout_height="match_parent"
     android:id="@+id/board_framelayout">
     
-	<AbsoluteLayout android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:id="@+id/board_abslayout"
-	    android:layout_gravity="left">
-	    
-	</AbsoluteLayout>
+    <!-- 顶部横条 -->
+    <RelativeLayout android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:paddingTop="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="7dp"
+        android:background="@drawable/topbar_bg" >
+        <RadioGroup android:id="@+id/modesel_group"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:background="#00ffffff">
+            <RadioButton android:id="@+id/handdraw_btn"
+                android:layout_height="match_parent"
+                android:layout_width="30dp"
+                android:button="@null"
+                android:background="@drawable/handdraw_btn"
+                android:layout_marginRight="5dp" />
+            <RadioButton android:id="@+id/picdraw_btn"
+                android:layout_height="match_parent"
+                android:layout_width="30dp"
+                android:button="@null"
+                android:background="@drawable/handdraw_btn"
+                android:layout_marginRight="5dp" />
+            <RadioButton android:id="@+id/notedraw_btn"
+                android:layout_height="match_parent"
+                android:layout_width="30dp"
+                android:button="@null"
+                android:background="@drawable/handdraw_btn" />
+        </RadioGroup>
+        
+    </RelativeLayout>
+	
+    <!-- 底部参数选择条 -->
+    
+    <!-- 手绘模式底部参数选择条 -->
+    <RadioGroup android:id="@+id/handdraw_conf_bar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/footerbar_bg" >
+        
+    </RadioGroup>
+    
+    <!-- 便签模式底部参数选择条 -->
+    <LinearLayout android:id="@+id/note_conf_layout"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:background="@drawable/footerbar_bg" >
+        
+        <ToggleButton android:id="@+id/note_conf_style_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:textOn=""
+            android:textOff=""
+            android:background="@drawable/handdraw_btn"/>
+        
+        <ToggleButton android:id="@+id/note_conf_textsize_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:textOn=""
+            android:textOff=""
+            android:background="@drawable/handdraw_btn"/>
+        
+    </LinearLayout>
+    
+    <!-- 便签模式底部样式参数选择条 -->
+    <RadioGroup android:id="@+id/note_style_group"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="40dp"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:background="@drawable/subbar_bg">
+        <RadioButton android:id="@+id/note_style_blue"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_blue"/>
+        <RadioButton android:id="@+id/note_style_orange"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_orange"/>
+        <RadioButton android:id="@+id/note_style_green"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_green"/>
+        <RadioButton android:id="@+id/note_style_red"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_red"/>
+        <RadioButton android:id="@+id/note_style_purple"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_purple"/>
+        <RadioButton android:id="@+id/note_style_white"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_gray"/>
+    </RadioGroup>
+    
+    <!-- 便签模式底部字体大小参数选择条 -->
+    <LinearLayout android:id="@+id/note_textsize_layout"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="40dp"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:background="@drawable/subbar_bg">
+        
+        <TextView android:id="@+id/note_textsize_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:gravity="center_vertical|left"
+            android:paddingLeft="5dp"
+            android:textSize="20dp"
+            android:text="20" />
+        
+        <SeekBar android:id="@+id/note_textsize_sbar"
+            android:layout_width="match_parent"
+            android:layout_height="23dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:minHeight="4dp"
+            android:maxHeight="23dp"
+            android:layout_gravity="center_vertical"
+            android:thumb="@drawable/note_textsize_thumb"
+            android:progressDrawable="@drawable/note_textsize_seek"
+            android:max="100"
+            android:progress="50"/>
+
+    </LinearLayout>
+    
+    <!-- 缩放比例显示 -->
+    <TextView android:id="@+id/scale_ratio_txt"
+        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:textColor="#ffffff"
+        android:layout_gravity="bottom|right"
+        android:gravity="center"
+        android:textSize="30dp"
+        android:text="100%"/>
     
 </FrameLayout>

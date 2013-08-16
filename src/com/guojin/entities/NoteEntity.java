@@ -11,8 +11,18 @@ import android.view.MotionEvent;
 import com.guojin.text.DynamicTextLayout;
 import com.guojin.text.DynamicTextLayout.TextOutSizeListener;
 
-public class NoteEntity implements Entity, HandleTouchEvent {
-
+public class NoteEntity implements Entity {
+	
+	// 实体类型
+	private int type = BoardEntity.TYPE_NOTE_ENTITY;
+	@Override
+	public int getType() {
+		return type;
+	}
+	
+	// 是否获取到焦点
+	public boolean isFocus = false;
+	
 	// 便签的最小长宽
 	private static final double MIN_WIDTH = 150;
 	private static final double MIN_HEIGHT = 150;
@@ -38,8 +48,6 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	private float oldX;
 	private float oldY;
 	
-	// 是否显示边界指示
-	private boolean isShowSizeIndicate = false;
 	// 可移动标志位
 	private boolean isMoveable = false;
 	// 可控制大小标志位
@@ -75,6 +83,7 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	private double textSpan = 1;
 	
 	public NoteEntity(BoardEntity be, Context c) {
+		
 		boardEntity = be;
 		context = c;
 		
@@ -142,7 +151,7 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 		canvas.drawRect(sp.x, sp.y, sp.x + sw, sp.y + sh, bgPaint);
 		
 		// 绘制控制点
-		if (isShowSizeIndicate) {
+		if (isFocus) {
 			drawMoveIndicate(canvas);
 			drawResizeIndicate(canvas);
 			drawDelIndicate(canvas);
@@ -250,12 +259,27 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 		delIndicatePaint.setColor(oldColor);
 	}
 	
+	/**
+	 * 移除焦点
+	 */
+	@Override
+	public void removeFocus() {
+		isFocus = false;
+		// 关闭输入法显示
+		boardEntity.toggleInput(false);
+		textLayout.showCursor(false);
+		
+		// 请求重绘
+		boardEntity.invalidateView();
+	}
+	
 	@Override
 	public void onEntityTouchEvent(MotionEvent event) {
 		
-		// 将点击事件传入
-		if (isShowSizeIndicate) {
-			textLayout.onTouchEvent(event);
+		if (!isFocus) {
+			isFocus = true;
+			boardEntity.invalidateView();
+			return;
 		}
 		
 		switch (event.getAction()) {
@@ -266,38 +290,24 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 			oldY = event.getY();
 			
 			// 判断点击位置
-			if (isInNoteRange(oldX, oldY)) {
-				if (!isShowSizeIndicate) {
-					// 选中、获取焦点
-					isShowSizeIndicate = true;
-					isMoveable = false;
-					isResizeable = false;
-				} else {
-					// 开启文本输入
-					boardEntity.toggleInput(true);
-					textLayout.showCursor(true);
-				}
+			if (isInNormalRange(oldX, oldY)) {
+				textLayout.onTouchEvent(event);
+				boardEntity.toggleInput(true);
+				textLayout.showCursor(true);
 			}
 			
 			// 判断是否为移动操作
-			if (isShowSizeIndicate && isInMoveIndicRange(oldX, oldY)) {
+			if (isInMoveIndicRange(oldX, oldY)) {
 				isMoveable = true;
 			} else {
 				isMoveable = false;
 			}
 			
 			// 判断是否为尺寸操作
-			if (isShowSizeIndicate && isInResizeIndicRange(oldX, oldY)) {
+			if (isInResizeIndicRange(oldX, oldY)) {
 				isResizeable = true;
 			} else {
 				isResizeable = false;
-			}
-			
-			if (!isInNoteRange(oldX, oldY) && !isMoveable && !isResizeable) {
-				isShowSizeIndicate = false;
-				// 关闭输入法显示
-				boardEntity.toggleInput(false);
-				textLayout.showCursor(false);
 			}
 			
 			boardEntity.invalidateView();
@@ -373,12 +383,26 @@ public class NoteEntity implements Entity, HandleTouchEvent {
 	}
 	
 	/**
+	 * 判断屏幕坐标是否在本实体范围之内
+	 */
+	@Override
+	public boolean isInRange(float x, float y) {
+		
+		if (isFocus) {
+			return isInNormalRange(x, y) || isInMoveIndicRange(x, y) || isInResizeIndicRange(x, y);
+		} else {
+			return isInNormalRange(x, y);
+		}
+		
+	}
+	
+	/**
 	 * 判断屏幕坐标是否在文字输入范围内
 	 * @param sx
 	 * @param sy
 	 * @return
 	 */
-	private boolean isInNoteRange(float sx, float sy) {
+	private boolean isInNormalRange(float sx, float sy) {
 		double[] bp = boardEntity.screenToBoardCoodTrans(sx, sy);
 //		Log.d("DevLog", String.format("%f,%f", bp[0], bp[1]));
 		if (bp[0] > boardX && bp[0] < (boardX + noteWidth) 
