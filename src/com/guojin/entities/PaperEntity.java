@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.view.MotionEvent;
 
 /**
  * 纸张实体
@@ -12,6 +13,11 @@ import android.graphics.PointF;
  */
 public class PaperEntity implements Entity {
 
+	@Override
+	public int getType() {
+		return 0;
+	}
+	
 	/**
 	 * 格子纸
 	 */
@@ -229,5 +235,21 @@ public class PaperEntity implements Entity {
 			
 			x += GRIDSIZE;
 		}
+	}
+	
+	@Override
+	public void onEntityTouchEvent(MotionEvent event) {
+		// 空实现
+	}
+
+	@Override
+	public boolean isInRange(float x, float y) {
+		// 空实现
+		return false;
+	}
+
+	@Override
+	public void removeFocus() {
+		// 空实现
 	}
 }

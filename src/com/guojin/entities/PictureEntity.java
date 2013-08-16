@@ -15,7 +15,7 @@ import android.view.MotionEvent;
  * @author jinux
  * 
  */
-public class PictureEntity implements Entity, HandleTouchEvent {
+public class PictureEntity implements Entity {
 
 	private static String TAG = "BoardPicture";
 
@@ -514,5 +514,23 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 			}
 			break;
 		}
+	}
+
+	@Override
+	public int getType() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean isInRange(float x, float y) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void removeFocus() {
+		// TODO Auto-generated method stub
+		
 	}
 }

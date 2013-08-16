@@ -1,16 +1,23 @@
 package com.guojin.entities;
 
+import java.util.LinkedList;
+
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.view.MotionEvent;
 
 import com.guojin.whiteboard.BoardView;
-import com.guojin.whiteboard.R;
 
 public class BoardEntity {
 
+	// 类型常量
+	public static final int TYPE_PIC_ENTITY = 0x01;
+	public static final int TYPE_NOTE_ENTITY = 0x02;
+	
 	// 总缩放比例
 	private double totalScale = 1;
 
@@ -30,15 +37,22 @@ public class BoardEntity {
 	// Context
 	private Context context;
 
-	private SimpleEntity textEntity;
-
 	// 纸张实体
 	private PaperEntity paperEntity;
-	// 便签实体
-	private NoteEntity noteEntity;
-
-	// picture------------
-	private PictureEntity picture;
+	
+	// 实体链表
+	private LinkedList<Entity> entityList = new LinkedList<Entity>();
+	
+	// 标识是否已经有实体获取焦点
+	private boolean isCapture = false;
+	
+	// 当前已经获取焦点的Entity
+	private Entity focusedEntity = null;
+	// 获取到焦点的Entity的原位置
+	private int originEntityIndex = -1;
+	
+	// 遮盖层
+	private Paint coverPaint = new Paint();
 
 	/**
 	 * 构造函数
@@ -47,22 +61,27 @@ public class BoardEntity {
 
 		context = c;
 
-		textEntity = new SimpleEntity(this);
-		textEntity.x = 100L;
-		textEntity.y = 100L;
-		textEntity.initRadius = 20f;
-
+		// 初始化画笔
+		coverPaint.setAntiAlias(true);
+		coverPaint.setColor(Color.argb(150, 200, 200, 200));
+		
 		// 初始化纸张实体
 		paperEntity = new PaperEntity(this, PaperEntity.GRID_PAPER);
-
-		// 初始化便签实体
-		noteEntity = new NoteEntity(this, c);
-
-		// picture--------------------------
-		picture = new PictureEntity(this, BitmapFactory.decodeResource(
-				this.context.getResources(), R.drawable.test), 200, 200);
+		loadEntity();
 	}
 
+	/**
+	 * 加载实体
+	 */
+	private void loadEntity() {
+		entityList.add(new NoteEntity(this, context));
+		entityList.add(new NoteEntity(this, context));
+		entityList.add(new NoteEntity(this, context));
+		entityList.add(new NoteEntity(this, context));
+//		entityList.add(new PictureEntity(this, BitmapFactory.decodeResource(
+//				this.context.getResources(), R.drawable.test), 200, 200));
+	}
+	
 	/**
 	 * 绘制方法
 	 * 
@@ -71,12 +90,20 @@ public class BoardEntity {
 	public void draw(Canvas canvas) {
 		// 绘制纸张背景
 		paperEntity.draw(canvas);
-		// 绘制便签
-		noteEntity.draw(canvas);
-
-		// picture---------------------
-		picture.draw(canvas);
-		// textEntity.draw(canvas);
+		
+		for (Entity e : entityList) {
+			e.draw(canvas);
+		}
+		
+		// 绘制获取焦点的实体
+		if (focusedEntity != null) {
+			int[] loc = new int[2];
+			mBindedView.getLocationOnScreen(loc);
+			RectF bounds = new RectF(0, 0
+					, mBindedView.getWidth(), mBindedView.getHeight());
+			canvas.drawRect(bounds, coverPaint);
+			focusedEntity.draw(canvas);
+		}
 	}
 
 	/**
@@ -92,10 +119,41 @@ public class BoardEntity {
 		float y = event.getY();
 		event.setLocation(x + loc[0], y - loc[1]);
 
-		noteEntity.onEntityTouchEvent(event);
-
-		// picture-------------
-		picture.onEntityTouchEvent(event);
+		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			if (focusedEntity != null && focusedEntity.isInRange(event.getX(), event.getY())) {
+				// 如果点击位置在已经获取焦点的实体范围内
+				
+				
+				focusedEntity.onEntityTouchEvent(event);
+			} else {
+				if (focusedEntity != null) {
+					focusedEntity.removeFocus();
+					entityList.add(originEntityIndex, focusedEntity);
+					focusedEntity = null;
+				}
+				
+				isCapture = false;
+				// 便利查找获取焦点的实体
+				for (int i = entityList.size() - 1; i >= 0; i--) {
+					Entity e = entityList.get(i);
+					if (!isCapture && e.isInRange(event.getX(), event.getY())) {
+						isCapture = true;
+						originEntityIndex = i;
+						entityList.remove(i);
+						
+						e.onEntityTouchEvent(event);
+						focusedEntity = e;
+						break;
+					}
+				}
+			}
+		} else {
+			if (focusedEntity != null) {
+				focusedEntity.onEntityTouchEvent(event);
+			}
+		}
+		
+		
 	}
 
 	/**
@@ -157,14 +215,18 @@ public class BoardEntity {
 	 * @param isNewLine 是否为新起一行，如果为true，参数text可以为null
 	 */
 	public void commitInputText(String text, boolean isNewLine) {
-		noteEntity.commitInputText(text, isNewLine);
+		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity)focusedEntity).commitInputText(text, isNewLine);
+		}
 	}
 	
 	/**
 	 * 删除之前提交的一个文本字符
 	 */
 	public void delPrevInputText() {
-		noteEntity.delPrevInputText();
+		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity)focusedEntity).delPrevInputText();
+		}
 	}
 	
 	/**

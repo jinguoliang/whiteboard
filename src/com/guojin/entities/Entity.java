@@ -9,5 +9,11 @@ public interface Entity {
 	 * @param canvas
 	 */
 	public void draw(Canvas canvas);
-	
+	public void onEntityTouchEvent(MotionEvent event);
+	public int getType();
+	public boolean isInRange(float x, float y);
+	/**
+	 * 移除焦点
+	 */
+	public void removeFocus();
 }
