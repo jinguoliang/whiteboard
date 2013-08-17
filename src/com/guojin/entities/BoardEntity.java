@@ -16,15 +16,25 @@ import com.guojin.whiteboard.R;
 
 public class BoardEntity {
 
+	// 模式常量
+	public static final int MODE_HANDDRAW = 0x11;
+	public static final int MODE_PIC = 0x12;
+	public static final int MODE_NOTE = 0x13;
+	
+	public int mode = MODE_HANDDRAW;	// 当前模式
+	
 	// 类型常量
 	public static final int TYPE_PIC_ENTITY = 0x01;
 	public static final int TYPE_NOTE_ENTITY = 0x02;
-	//-------jinux
 	public static final int TYPE_PATH_ENTITY = 0x03;
+	
+	// 缩放范围
+	public static final double MAX_TOTAL_SCALE = 3;
+	public static final double MIN_TOTAL_SCALE = 0.4;
 	
 	// 总缩放比例
 	private double totalScale = 1;
-
+	
 	// 总偏移量（相对于最初始位置）
 	private double totalOffsetX = 0;
 	private double totalOffsetY = 0;
@@ -84,11 +94,44 @@ public class BoardEntity {
 	 */
 	private void loadEntity() {
 		entityList.add(new NoteEntity(this, context));
-		entityList.add(new NoteEntity(this, context));
-		entityList.add(new NoteEntity(this, context));
-		entityList.add(new NoteEntity(this, context));
+		
 		entityList.add(new PictureEntity(this, BitmapFactory.decodeResource(
 				this.context.getResources(), R.drawable.test), 200, 200));
+	}
+	
+	/**
+	 * 设置便签字体大小
+	 * @param textSize
+	 */
+	public void setNoteTextSize(float textSize) {
+		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity)focusedEntity).setTextSize(textSize);
+			invalidateView();
+		}
+	}
+	
+	/**
+	 * 设置便签样式颜色
+	 * @param color
+	 */
+	public void setNoteStyleColor(int color) {
+		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity)focusedEntity).setStyleColor(color);
+			invalidateView();
+		}
+	}
+	
+	/**
+	 * 删除一个实体
+	 * @param entity
+	 */
+	public void delEntity(Entity entity) {
+		if (focusedEntity.equals(entity)) {
+			focusedEntity = null;
+		} else {
+			entityList.remove(entity);
+		}
+		invalidateView();
 	}
 	
 	/**
@@ -130,43 +173,49 @@ public class BoardEntity {
 		float y = event.getY();
 		event.setLocation(x + loc[0], y - loc[1]);
 
-		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			if (focusedEntity != null && focusedEntity.isInRange(event.getX(), event.getY())) {
-				// 如果点击位置在已经获取焦点的实体范围内
-				
-				
-				focusedEntity.onEntityTouchEvent(event);
-			} else {
-				if (focusedEntity != null) {
-					focusedEntity.removeFocus();
-					entityList.add(originEntityIndex, focusedEntity);
-					focusedEntity = null;
-				}
-				
-				isCapture = false;
-				// 便利查找获取焦点的实体
-				for (int i = entityList.size() - 1; i >= 0; i--) {
-					Entity e = entityList.get(i);
-					if (!isCapture && e.isInRange(event.getX(), event.getY())) {
-						isCapture = true;
-						originEntityIndex = i;
-						entityList.remove(i);
-						
-						e.onEntityTouchEvent(event);
-						focusedEntity = e;
-						break;
+		// 图片模式或便签模式下
+		if (mode == MODE_PIC || mode == MODE_NOTE) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				if (focusedEntity != null && focusedEntity.isInRange(event.getX(), event.getY())) {
+					// 如果点击位置在已经获取焦点的实体范围内
+					
+					
+					focusedEntity.onEntityTouchEvent(event);
+				} else {
+					if (focusedEntity != null) {
+						focusedEntity.removeFocus();
+						entityList.add(originEntityIndex, focusedEntity);
+						focusedEntity = null;
+					}
+					
+					isCapture = false;
+					// 便利查找获取焦点的实体
+					for (int i = entityList.size() - 1; i >= 0; i--) {
+						Entity e = entityList.get(i);
+						if (!isCapture && e.isInRange(event.getX(), event.getY())) {
+							isCapture = true;
+							originEntityIndex = i;
+							entityList.remove(i);
+							
+							e.onEntityTouchEvent(event);
+							focusedEntity = e;
+							break;
+						}
 					}
 				}
+			} else {
+				if (focusedEntity != null) {
+					focusedEntity.onEntityTouchEvent(event);
+				}
 			}
-		} else {
-			if (focusedEntity != null) {
-				focusedEntity.onEntityTouchEvent(event);
-			}
+		} else if (mode == MODE_HANDDRAW) {
+			// 手绘模式
+			pathFactory.onTouch(event);
+			invalidateView();
 		}
 		
-		//------jinux
-		pathFactory.onTouch(event);
-		invalidateView();
+		
+		
 		
 	}
 
@@ -326,8 +375,10 @@ public class BoardEntity {
 		float bmy = (float) (smy / totalScale - totalOffsetY);
 
 		// 计算总缩放比例
-		totalScale *= scale;
-
+		if (totalScale * scale > MIN_TOTAL_SCALE && totalScale * scale < MAX_TOTAL_SCALE) {
+			totalScale *= scale;
+		}
+		
 		totalOffsetX = smx / totalScale - bmx;
 		totalOffsetY = smy / totalScale - bmy;
 

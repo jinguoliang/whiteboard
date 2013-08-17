@@ -8,7 +8,7 @@
             <corners android:radius="2dp"/>
             <stroke android:width="2dp"
                 android:color="@color/note_style_selected"/>
-            <solid android:color="#ff3030"/>
+            <solid android:color="@color/note_style_red"/>
         </shape>
     </item>
 
@@ -17,7 +17,7 @@
         android:state_checked="false">
         <shape android:shape="rectangle">
             <corners android:radius="2dp"/>
-            <solid android:color="#ff3030"/>
+            <solid android:color="@color/note_style_red"/>
         </shape>
     </item>
     

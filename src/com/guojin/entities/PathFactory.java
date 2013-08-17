@@ -32,6 +32,9 @@ public class PathFactory {
 		cPath = new Path();
 		mPaint = new Paint();
 		mPaint.setStyle(Paint.Style.STROKE);
+		mPaint.setAntiAlias(true);
+		mPaint.setStrokeCap(Paint.Cap.ROUND);
+		mPaint.setStrokeJoin(Paint.Join.ROUND);
 	}
 
 	public void draw(Canvas canvas) {

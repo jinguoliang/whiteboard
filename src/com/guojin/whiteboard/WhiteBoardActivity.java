@@ -5,12 +5,14 @@ import android.graphics.PointF;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -26,6 +28,7 @@ public class WhiteBoardActivity extends Activity {
 	
 	private BoardView boardView;	// Board View
 	
+	private RelativeLayout topbarLayout;
 	private RadioGroup modeSelectGroup;		// 模式单选组
 	private RadioGroup handDrawModeConfGroup;		// 手绘模式配置单选组
 	
@@ -38,6 +41,8 @@ public class WhiteBoardActivity extends Activity {
 	private LinearLayout noteTextSizeConfLayout;	// 便签字体大小配置Layout
 	private TextView noteTextSizeTxt;		// 便签字体大小显示
 	private SeekBar noteTextSizeSeekbar;	// 便签字体调整
+	
+	private TextView scaleTextView;		// 缩放级别显示
 	
 	
 	@Override
@@ -60,19 +65,45 @@ public class WhiteBoardActivity extends Activity {
 		setContentView(layout);
 		
 		// 初始化控件
+		topbarLayout = (RelativeLayout)findViewById(R.id.topbar_layout);
+		topbarLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			}
+		});
+		
 		// 模式选择
 		modeSelectGroup = (RadioGroup)findViewById(R.id.modesel_group);
 		handDrawModeConfGroup = (RadioGroup)findViewById(R.id.handdraw_conf_bar);
 		
 		// 便签模式设置
 		noteModeConfLayout = (LinearLayout)findViewById(R.id.note_conf_layout);
+		noteModeConfLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			}
+		});
 		noteTextSizeBtn = (ToggleButton)findViewById(R.id.note_conf_textsize_btn);
 		noteStyleBtn = (ToggleButton)findViewById(R.id.note_conf_style_btn);
 		
 		noteStyleConfGroup = (RadioGroup)findViewById(R.id.note_style_group);
+		noteStyleConfGroup.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			}
+		});
 		noteTextSizeConfLayout = (LinearLayout)findViewById(R.id.note_textsize_layout);
+		noteTextSizeConfLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			}
+		});
 		noteTextSizeTxt = (TextView)findViewById(R.id.note_textsize_txt);
 		noteTextSizeSeekbar = (SeekBar)findViewById(R.id.note_textsize_sbar);
+		
+		// 缩放比例显示
+		scaleTextView = (TextView)findViewById(R.id.scale_ratio_txt);
+		scaleTextView.setText((int)(boardEntity.getTotalScale() * 100) + "%");
 		
 		// 模式选择监听器
 		modeSelectGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -134,6 +165,34 @@ public class WhiteBoardActivity extends Activity {
 					noteStyleConfGroup.setVisibility(View.VISIBLE);
 				} else {
 					noteStyleConfGroup.setVisibility(View.GONE);
+				}
+			}
+		});
+		
+		// 便签样式选择监听器
+		noteStyleConfGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				switch (checkedId) {
+				case R.id.note_style_blue:
+					boardEntity.setNoteStyleColor(getResources().getColor(R.color.note_style_blue));
+					break;
+				case R.id.note_style_green:
+					boardEntity.setNoteStyleColor(getResources().getColor(R.color.note_style_green));
+					break;
+				case R.id.note_style_orange:
+					boardEntity.setNoteStyleColor(getResources().getColor(R.color.note_style_orange));
+					break;
+				case R.id.note_style_purple:
+					boardEntity.setNoteStyleColor(getResources().getColor(R.color.note_style_purple));
+					break;
+				case R.id.note_style_red:
+					boardEntity.setNoteStyleColor(getResources().getColor(R.color.note_style_red));
+					break;
+				case R.id.note_style_gray:
+					boardEntity.setNoteStyleColor(getResources().getColor(R.color.note_style_gray));
+					break;
 				}
 			}
 		});
@@ -215,6 +274,8 @@ public class WhiteBoardActivity extends Activity {
 				PointF currMidPoint = getMidPoint(event);
 				boardEntity.calculate(currMidPoint.x, currMidPoint.y, scale
 						, dx, dy, boardView.getWidth(), boardView.getHeight());
+				// 显示缩放比例
+				scaleTextView.setText((int)(boardEntity.getTotalScale() * 100) + "%");
 				boardView.postInvalidate();
 				
 				
