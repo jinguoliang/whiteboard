@@ -74,7 +74,7 @@ public class PictureEntity implements Entity {
 		this.centerYonBoard = y;
 		this.scale = 1;
 		this.rotate = 0;
-		this.isFocused = true;
+		this.isFocused = false;
 		this.height = b.getHeight();
 		this.width = b.getWidth();
 
@@ -500,9 +500,12 @@ public class PictureEntity implements Entity {
 		switch (event.getAction()) {
 
 		case MotionEvent.ACTION_DOWN:
+			
 			onTouchDown(cx, cy);
 			sx = cx;
 			sy = cy;
+			boardEntity.invalidateView();
+
 			break;
 		case MotionEvent.ACTION_MOVE:
 			Log.e(TAG, "cx=" + cx + "," + "sx=" + sx);
@@ -518,19 +521,22 @@ public class PictureEntity implements Entity {
 
 	@Override
 	public int getType() {
-		// TODO Auto-generated method stub
-		return 0;
+		return BoardEntity.TYPE_PIC_ENTITY;
 	}
 
 	@Override
 	public boolean isInRange(float x, float y) {
-		// TODO Auto-generated method stub
-		return false;
+		if (isFocused) {
+			return containPointFInRect(x, y)||containPointFInContronPointF(x, y);
+		}else{
+			return containPointFInRect(x, y);
+		}
 	}
 
 	@Override
 	public void removeFocus() {
-		// TODO Auto-generated method stub
-		
+		this.isFocused=false;
+		// 请求重绘
+				boardEntity.invalidateView();
 	}
 }

@@ -3,6 +3,7 @@ package com.guojin.entities;
 import java.util.LinkedList;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,12 +12,15 @@ import android.graphics.RectF;
 import android.view.MotionEvent;
 
 import com.guojin.whiteboard.BoardView;
+import com.guojin.whiteboard.R;
 
 public class BoardEntity {
 
 	// 类型常量
 	public static final int TYPE_PIC_ENTITY = 0x01;
 	public static final int TYPE_NOTE_ENTITY = 0x02;
+	//-------jinux
+	public static final int TYPE_PATH_ENTITY = 0x03;
 	
 	// 总缩放比例
 	private double totalScale = 1;
@@ -39,6 +43,9 @@ public class BoardEntity {
 
 	// 纸张实体
 	private PaperEntity paperEntity;
+	
+	//将手绘的功能分离出来给PathFactory-------jinux
+	PathFactory pathFactory;
 	
 	// 实体链表
 	private LinkedList<Entity> entityList = new LinkedList<Entity>();
@@ -67,6 +74,8 @@ public class BoardEntity {
 		
 		// 初始化纸张实体
 		paperEntity = new PaperEntity(this, PaperEntity.GRID_PAPER);
+		//----------jinux
+		pathFactory=new PathFactory(this,this.entityList);
 		loadEntity();
 	}
 
@@ -78,8 +87,8 @@ public class BoardEntity {
 		entityList.add(new NoteEntity(this, context));
 		entityList.add(new NoteEntity(this, context));
 		entityList.add(new NoteEntity(this, context));
-//		entityList.add(new PictureEntity(this, BitmapFactory.decodeResource(
-//				this.context.getResources(), R.drawable.test), 200, 200));
+		entityList.add(new PictureEntity(this, BitmapFactory.decodeResource(
+				this.context.getResources(), R.drawable.test), 200, 200));
 	}
 	
 	/**
@@ -104,6 +113,8 @@ public class BoardEntity {
 			canvas.drawRect(bounds, coverPaint);
 			focusedEntity.draw(canvas);
 		}
+		
+		pathFactory.draw(canvas);
 	}
 
 	/**
@@ -153,6 +164,9 @@ public class BoardEntity {
 			}
 		}
 		
+		//------jinux
+		pathFactory.onTouch(event);
+		invalidateView();
 		
 	}
 
