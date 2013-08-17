@@ -341,8 +341,8 @@ public class NoteEntity implements Entity {
 			
 			// 判断是否为删除操作
 			if (isInDeleteIndicRange(oldX, oldY)) {
-				
-				Log.d("DevLog", "delete");
+				boardEntity.delEntity(this);
+				return;
 			}
 			
 			boardEntity.invalidateView();

@@ -5,7 +5,7 @@ import android.graphics.PointF;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
+import android.view.View.OnClickListener;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
@@ -66,12 +66,9 @@ public class WhiteBoardActivity extends Activity {
 		
 		// 初始化控件
 		topbarLayout = (RelativeLayout)findViewById(R.id.topbar_layout);
-		topbarLayout.setOnTouchListener(new OnTouchListener() {
-			
+		topbarLayout.setOnClickListener(new OnClickListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
-				return false;
+			public void onClick(View v) {
 			}
 		});
 		
@@ -81,11 +78,26 @@ public class WhiteBoardActivity extends Activity {
 		
 		// 便签模式设置
 		noteModeConfLayout = (LinearLayout)findViewById(R.id.note_conf_layout);
+		noteModeConfLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			}
+		});
 		noteTextSizeBtn = (ToggleButton)findViewById(R.id.note_conf_textsize_btn);
 		noteStyleBtn = (ToggleButton)findViewById(R.id.note_conf_style_btn);
 		
 		noteStyleConfGroup = (RadioGroup)findViewById(R.id.note_style_group);
+		noteStyleConfGroup.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			}
+		});
 		noteTextSizeConfLayout = (LinearLayout)findViewById(R.id.note_textsize_layout);
+		noteTextSizeConfLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			}
+		});
 		noteTextSizeTxt = (TextView)findViewById(R.id.note_textsize_txt);
 		noteTextSizeSeekbar = (SeekBar)findViewById(R.id.note_textsize_sbar);
 		

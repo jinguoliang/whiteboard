@@ -19,7 +19,7 @@ public class BoardEntity {
 	public static final int MODE_PIC = 0x12;
 	public static final int MODE_NOTE = 0x13;
 	
-	public int mode = MODE_HANDDRAW;	// 当前模式
+	public int mode = MODE_NOTE;	// 当前模式
 	
 	// 类型常量
 	public static final int TYPE_PIC_ENTITY = 0x01;
@@ -111,6 +111,19 @@ public class BoardEntity {
 			((NoteEntity)focusedEntity).setStyleColor(color);
 			invalidateView();
 		}
+	}
+	
+	/**
+	 * 删除一个实体
+	 * @param entity
+	 */
+	public void delEntity(Entity entity) {
+		if (focusedEntity.equals(entity)) {
+			focusedEntity = null;
+		} else {
+			entityList.remove(entity);
+		}
+		invalidateView();
 	}
 	
 	/**
