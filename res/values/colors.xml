@@ -6,4 +6,5 @@
     <color name="note_style_green">#00CD66</color>
     <color name="note_style_orange">#FFA500</color>
     <color name="note_style_purple">#B452CD</color>
+    <color name="note_style_red">#FF3030</color>
 </resources>

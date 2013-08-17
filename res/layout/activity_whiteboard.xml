@@ -5,7 +5,8 @@
     android:id="@+id/board_framelayout">
     
     <!-- 顶部横条 -->
-    <RelativeLayout android:layout_width="match_parent"
+    <RelativeLayout android:id="@+id/topbar_layout"
+        android:layout_width="match_parent"
         android:layout_height="42dp"
         android:paddingTop="5dp"
         android:paddingLeft="5dp"
@@ -117,7 +118,7 @@
             android:button="@null"
             android:layout_marginRight="10dp"
             android:background="@drawable/note_style_purple"/>
-        <RadioButton android:id="@+id/note_style_white"
+        <RadioButton android:id="@+id/note_style_gray"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:button="@null"

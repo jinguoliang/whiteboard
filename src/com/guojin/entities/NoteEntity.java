@@ -1,11 +1,13 @@
 package com.guojin.entities;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.guojin.text.DynamicTextLayout;
@@ -25,7 +27,7 @@ public class NoteEntity implements Entity {
 	
 	// 便签的最小长宽
 	private static final double MIN_WIDTH = 150;
-	private static final double MIN_HEIGHT = 150;
+	private static final double MIN_HEIGHT = 230;
 	
 	// 坐标
 	private double boardX = 0;
@@ -54,17 +56,15 @@ public class NoteEntity implements Entity {
 	private boolean isResizeable = false;
 	
 	// 移动指示器高度
-	private double moveIndicateHeight = 30;
+	private float moveIndicateHeight = 30;
 	// 大小控制指示器尺寸 
-	private double resizeIndicateSize = 20;
+	private float resizeIndicateSize = 20;
 	// 删除指示器尺寸
-	private double delIndicateSize = 30;
+	private float delIndicateSize = 40;
 	// 删除指示器的笔画宽度
-	private double delIndicateStrokeWidth = 2;
+	private float delIndicateStrokeWidth = 2;
 	// 文本尺寸
 	private float boardTextSize = 20;
-	
-	
 	
 	// 背景画笔
 	private Paint bgPaint;
@@ -74,6 +74,9 @@ public class NoteEntity implements Entity {
 	private Paint moveIndicatePaint;
 	// 删除指示器画笔
 	private Paint delIndicatePaint;
+	
+	// 背景颜色
+	private int bgColor = Color.rgb(0, 197, 205);
 	
 	private BoardEntity boardEntity;
 	private Context context;
@@ -90,7 +93,7 @@ public class NoteEntity implements Entity {
 		// 初始化背景画笔
 		bgPaint = new Paint();
 		bgPaint.setAntiAlias(true);
-		bgPaint.setColor(Color.rgb(0, 197, 205));
+		bgPaint.setColor(bgColor);
 		bgPaint.setShadowLayer(shadowRadius, shadowX, shadowY, shadowColor);
 		
 		// 初始化大小控制指示器画笔
@@ -131,6 +134,23 @@ public class NoteEntity implements Entity {
 	public void setBoardPosition(double x, double y) {
 		boardX = x;
 		boardY = y;
+	}
+	
+	/**
+	 * 设置文本尺寸
+	 * @param textSize
+	 */
+	public void setTextSize(float textSize) {
+		boardTextSize = textSize;
+	}
+	
+	/**
+	 * 设置背景颜色
+	 * @param color
+	 */
+	public void setStyleColor(int color) {
+		bgColor = color;
+		bgPaint.setColor(bgColor);
 	}
 	
 	@Override
@@ -193,15 +213,20 @@ public class NoteEntity implements Entity {
 	 */
 	private void drawMoveIndicate(Canvas canvas) {
 		
-		float bakStrokeWidth = moveIndicatePaint.getStrokeWidth();
-		float strokeWidth = boardEntity.boardToScreenSizeTrans(bakStrokeWidth);
-		moveIndicatePaint.setStrokeWidth(strokeWidth);
+//		float bakStrokeWidth = moveIndicatePaint.getStrokeWidth();
+//		float strokeWidth = boardEntity.boardToScreenSizeTrans(bakStrokeWidth);
+//		moveIndicatePaint.setStrokeWidth(strokeWidth);
 		
 		// 左上角屏幕绘制位置
-		PointF sp = boardEntity.boardToScreenCoodTrans(boardX, boardY - moveIndicateHeight);
+//		PointF sp = boardEntity.boardToScreenCoodTrans(boardX, boardY - moveIndicateHeight);
 		// 屏幕绘制高
-		float h = boardEntity.boardToScreenSizeTrans(moveIndicateHeight);
+//		float h = boardEntity.boardToScreenSizeTrans(moveIndicateHeight);
 		// 屏幕绘制宽
+//		float w = boardEntity.boardToScreenSizeTrans(noteWidth);
+		
+		PointF sp = boardEntity.boardToScreenCoodTrans(boardX, boardY);
+		sp.y -= moveIndicateHeight;
+		float h = moveIndicateHeight;
 		float w = boardEntity.boardToScreenSizeTrans(noteWidth);
 		
 		canvas.drawRect(sp.x, sp.y, sp.x + w, sp.y + h, moveIndicatePaint);
@@ -213,7 +238,7 @@ public class NoteEntity implements Entity {
 			canvas.drawLine(sp.x + 5, sp.y + ph * i, sp.x + w - 5, sp.y + ph * i, moveIndicatePaint);
 		}
 		moveIndicatePaint.setColor(bakColor);
-		moveIndicatePaint.setStrokeWidth(bakStrokeWidth);
+//		moveIndicatePaint.setStrokeWidth(bakStrokeWidth);
 	}
 	
 	/**
@@ -222,7 +247,8 @@ public class NoteEntity implements Entity {
 	 */
 	private void drawResizeIndicate(Canvas canvas) {
 		
-		float r = boardEntity.boardToScreenSizeTrans(resizeIndicateSize);
+//		float r = boardEntity.boardToScreenSizeTrans(resizeIndicateSize);
+		float r = resizeIndicateSize;
 		PointF rbp = boardEntity.boardToScreenCoodTrans(boardX + noteWidth, boardY + noteHeight);
 		
 		// 绘制斜线用于标明指示区域
@@ -235,10 +261,13 @@ public class NoteEntity implements Entity {
 	 * @param canvas
 	 */
 	private void drawDelIndicate(Canvas canvas) {
-		float ss = boardEntity.boardToScreenSizeTrans(delIndicateSize);
+//		float ss = boardEntity.boardToScreenSizeTrans(delIndicateSize);
+		float ss = delIndicateSize;
 		PointF sp = boardEntity.boardToScreenCoodTrans(boardX, boardY);
 		float sw = boardEntity.boardToScreenSizeTrans(noteWidth);
-		float ssw = boardEntity.boardToScreenSizeTrans(delIndicateStrokeWidth);
+//		float ssw = boardEntity.boardToScreenSizeTrans(delIndicateStrokeWidth);
+		float ssw = delIndicateStrokeWidth;
+		
 		// 保存画笔原参数
 		int oldColor = delIndicatePaint.getColor();
 		
@@ -310,6 +339,12 @@ public class NoteEntity implements Entity {
 				isResizeable = false;
 			}
 			
+			// 判断是否为删除操作
+			if (isInDeleteIndicRange(oldX, oldY)) {
+				
+				Log.d("DevLog", "delete");
+			}
+			
 			boardEntity.invalidateView();
 			break;
 			
@@ -344,8 +379,20 @@ public class NoteEntity implements Entity {
 				
 				float newX = event.getX();
 				float newY = event.getY();
+				
 				float distX = newX - oldX;
 				float distY = newY - oldY;
+				
+				PointF sp = boardEntity.boardToScreenCoodTrans(boardX, boardY);
+				float sminw = boardEntity.boardToScreenSizeTrans(MIN_WIDTH);
+				float sminh = boardEntity.boardToScreenSizeTrans(MIN_HEIGHT);
+				if (newX < sp.x + sminw) {
+					distX = 0;
+				}
+				if (newY < sp.y + sminh) {
+					distY = 0;
+				}
+				
 				
 				if (Math.abs(distX) > 0.5f || Math.abs(distY) > 0.5f) {
 					// 临时值
@@ -389,7 +436,8 @@ public class NoteEntity implements Entity {
 	public boolean isInRange(float x, float y) {
 		
 		if (isFocus) {
-			return isInNormalRange(x, y) || isInMoveIndicRange(x, y) || isInResizeIndicRange(x, y);
+			return isInNormalRange(x, y) || isInMoveIndicRange(x, y) 
+					|| isInResizeIndicRange(x, y) || isInDeleteIndicRange(x, y);
 		} else {
 			return isInNormalRange(x, y);
 		}
@@ -421,7 +469,8 @@ public class NoteEntity implements Entity {
 	private boolean isInMoveIndicRange(float sx, float sy) {
 		double[] bp = boardEntity.screenToBoardCoodTrans(sx, sy);
 		if (bp[0] > boardX && bp[0] < (boardX + noteWidth) 
-				&& bp[1] > boardY - moveIndicateHeight && bp[1] < boardY) {
+				&& bp[1] > boardY - boardEntity.screenToBoardSizeTrans(moveIndicateHeight)
+				&& bp[1] < boardY) {
 			return true;
 		}
 		return false;
@@ -435,12 +484,28 @@ public class NoteEntity implements Entity {
 	 */
 	private boolean isInResizeIndicRange(float sx, float sy) {
 		double[] bp = boardEntity.screenToBoardCoodTrans(sx, sy);
-		double a = Math.abs(bp[0] - (boardX + noteWidth)) * Math.abs(bp[0] - (boardX + noteWidth));
-		double b = Math.abs(bp[1] - (boardY + noteHeight)) * Math.abs(bp[1] - (boardY + noteHeight));
-		if (Math.sqrt(a + b) < resizeIndicateSize) {
+		double a = (bp[0] - (boardX + noteWidth)) * (bp[0] - (boardX + noteWidth));
+		double b = (bp[1] - (boardY + noteHeight)) * (bp[1] - (boardY + noteHeight));
+		if (Math.sqrt(a + b) < boardEntity.screenToBoardSizeTrans(resizeIndicateSize)) {
 			return true;
 		}
 		return false;
 	}
 	
+	/**
+	 * 判断屏幕点击点是否在删除控制区域，并设置发生控制的位置
+	 * @param sx
+	 * @param sy
+	 * @return
+	 */
+	private boolean isInDeleteIndicRange(float sx, float sy) {
+		double[] bp = boardEntity.screenToBoardCoodTrans(sx, sy);
+		double bs = boardEntity.screenToBoardSizeTrans(delIndicateSize);
+		
+		if (bp[0] > boardX + noteWidth && bp[0] < boardX + noteWidth + bs 
+				&& bp[1] > boardY && bp[1] < boardY + bs) {
+			return true;
+		}
+		return false;
+	}
 }
