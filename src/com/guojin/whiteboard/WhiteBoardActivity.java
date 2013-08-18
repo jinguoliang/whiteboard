@@ -52,6 +52,7 @@ public class WhiteBoardActivity extends Activity {
 	
 	private RadioGroup modeSelectGroup; // 模式单选组
 	private RadioGroup handDrawModeConfGroup; // 手绘模式配置单选组
+	private ToggleButton handDrawModeEraserBtn;	// 橡皮擦切换按钮
 
 	private LinearLayout noteModeConfLayout; // 便签模式总配置Layout
 	private Button noteAddNewBtn;
@@ -104,7 +105,20 @@ public class WhiteBoardActivity extends Activity {
 		// 模式选择
 		modeSelectGroup = (RadioGroup) findViewById(R.id.modesel_group);
 		handDrawModeConfGroup = (RadioGroup) findViewById(R.id.handdraw_conf_layout);
-
+		// 橡皮切换按钮
+		handDrawModeEraserBtn = (ToggleButton)findViewById(R.id.handraw_conf_eraser_btn);
+		handDrawModeEraserBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					
+				} else {
+					
+				}
+			}
+		});
+		
 		// 便签模式设置
 		noteModeConfLayout = (LinearLayout) findViewById(R.id.note_conf_layout);
 		noteModeConfLayout.setOnClickListener(new OnClickListener() {
