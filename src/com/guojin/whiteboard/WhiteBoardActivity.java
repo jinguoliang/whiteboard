@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.guojin.entities.BoardEntity;
+import com.guojin.entities.PathFactory;
 
 public class WhiteBoardActivity extends Activity {
 
@@ -72,6 +73,10 @@ public class WhiteBoardActivity extends Activity {
 	private float firstTouchY = -1;
 	private boolean isOnePointAction = false;
 	private long firstTouchTime = -1;
+	
+	//记录切换到橡皮模式前笔触的模式
+	private int oldPaintMode=PathFactory.PATH_MODE_PAINT;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,12 +114,15 @@ public class WhiteBoardActivity extends Activity {
 		handDrawModeEraserBtn = (ToggleButton)findViewById(R.id.handraw_conf_eraser_btn);
 		handDrawModeEraserBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			
+
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				PathFactory pathFactory=boardEntity.getPathFactory();
 				if (isChecked) {
-					
+					oldPaintMode=pathFactory.getMode();
+					pathFactory.changePathMode(PathFactory.PATH_MODE_ERASER);
 				} else {
-					
+					pathFactory.changePathMode(oldPaintMode);
 				}
 			}
 		});

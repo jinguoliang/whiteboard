@@ -16,7 +16,6 @@ public class PathFactory {
 	private static final float TOUCH_TOLERANCE = 5;
 	public static final int PATH_MODE_PAINT = 0x01;
 	public static final int PATH_MODE_ERASER = 0x02;
-	public static final int PATH_MODE_ERASER2 = 0x03;
 
 	private int currentPathMode;
 
@@ -35,15 +34,9 @@ public class PathFactory {
 		this.currentPathMode = mode;
 		switch (mode) {
 		case PATH_MODE_PAINT:
-			mPaint.setXfermode(null);
 			break;
 		case PATH_MODE_ERASER:
-			mPaint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
 			break;
-		case PATH_MODE_ERASER2:
-			mPaint.setXfermode(null);
-			break;
-
 		}
 	}
 
@@ -90,7 +83,7 @@ public class PathFactory {
 	private void touch_up() {
 		cPath.lineTo(sX, sY);
 		// 当抬起时，如果不是橡皮,一个笔触结束，于是，将其画到mBitmap上，并添加到pathList上
-		if (currentPathMode != PathFactory.PATH_MODE_ERASER2) {
+		if (currentPathMode != PathFactory.PATH_MODE_ERASER) {
 			entityList.add(new PathEntity(this.board, cPath, mPaint, px, py));
 		}
 		// 重置cPath以便下一次重用
@@ -103,7 +96,7 @@ public class PathFactory {
 		float y = event.getY();
 
 		//如果是清楚笔触模式,则根据触点位置查找笔触,删掉它
-		if (currentPathMode == PATH_MODE_ERASER2) {
+		if (currentPathMode == PATH_MODE_ERASER) {
 			List<Entity> tmplist = new ArrayList<Entity>();
 			for (Iterator<Entity> iterator = this.entityList.iterator(); iterator
 					.hasNext();) {
@@ -135,6 +128,10 @@ public class PathFactory {
 			touch_up();
 			break;
 		}
+	}
+
+	public int getMode() {
+		return this.currentPathMode;
 	}
 
 }
