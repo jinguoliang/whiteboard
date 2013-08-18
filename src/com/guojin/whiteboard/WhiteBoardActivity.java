@@ -1,6 +1,7 @@
 package com.guojin.whiteboard;
 
 import java.io.File;
+import java.util.Date;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -51,6 +52,7 @@ public class WhiteBoardActivity extends Activity {
 	
 	private RadioGroup modeSelectGroup; // 模式单选组
 	private RadioGroup handDrawModeConfGroup; // 手绘模式配置单选组
+	private ToggleButton handDrawModeEraserBtn;	// 橡皮擦切换按钮
 
 	private LinearLayout noteModeConfLayout; // 便签模式总配置Layout
 	private Button noteAddNewBtn;
@@ -65,6 +67,11 @@ public class WhiteBoardActivity extends Activity {
 
 	private TextView scaleTextView; // 缩放级别显示
 	protected File tmpPicFile;
+	
+	private float firstTouchX = -1;
+	private float firstTouchY = -1;
+	private boolean isOnePointAction = false;
+	private long firstTouchTime = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,8 +104,21 @@ public class WhiteBoardActivity extends Activity {
 
 		// 模式选择
 		modeSelectGroup = (RadioGroup) findViewById(R.id.modesel_group);
-		handDrawModeConfGroup = (RadioGroup) findViewById(R.id.handdraw_conf_bar);
-
+		handDrawModeConfGroup = (RadioGroup) findViewById(R.id.handdraw_conf_layout);
+		// 橡皮切换按钮
+		handDrawModeEraserBtn = (ToggleButton)findViewById(R.id.handraw_conf_eraser_btn);
+		handDrawModeEraserBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					
+				} else {
+					
+				}
+			}
+		});
+		
 		// 便签模式设置
 		noteModeConfLayout = (LinearLayout) findViewById(R.id.note_conf_layout);
 		noteModeConfLayout.setOnClickListener(new OnClickListener() {
@@ -290,8 +310,56 @@ public class WhiteBoardActivity extends Activity {
 
 		// Log.d("DevLog", String.format("touch position: %f,%f", event.getX(),
 		// event.getY()));
-
-		if (pointerCount == 2) {
+		
+		if (pointerCount == 1) {
+			
+			if (boardEntity.mode == BoardEntity.MODE_HANDDRAW) {
+				if (!isOnePointAction) {
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN:
+						firstTouchX = event.getX();
+						firstTouchY = event.getY();
+						break;
+					case MotionEvent.ACTION_MOVE:
+						float deltaX = event.getX() - firstTouchX;
+						float deltaY = event.getY() - firstTouchY;
+						int distSqua = (int)(deltaX * deltaX) + (int)(deltaY * deltaY);
+						if (distSqua > 40) {
+							isOnePointAction = true;
+							event.setAction(MotionEvent.ACTION_DOWN);
+							boardEntity.onEntityTouchEvent(event);
+						}
+						break;
+					}
+					return false;
+				}
+			} else if (boardEntity.mode == BoardEntity.MODE_PIC) {
+				if (!isOnePointAction) {
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN:
+						firstTouchTime = new Date().getTime();
+						break;
+					case MotionEvent.ACTION_MOVE:
+						long curTouchTime = new Date().getTime();
+						if (curTouchTime - firstTouchTime > 100) {
+							isOnePointAction = true;
+							event.setAction(MotionEvent.ACTION_DOWN);
+							boardEntity.onEntityTouchEvent(event);
+						}
+						break;
+					}
+					return false;
+				}
+			}
+			
+			
+			boardEntity.onEntityTouchEvent(event);
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				isOnePointAction = false;
+			}
+		}
+		
+		if (!isOnePointAction && pointerCount == 2) {
 			switch (event.getActionMasked()) {
 			case MotionEvent.ACTION_MOVE:
 
@@ -342,9 +410,7 @@ public class WhiteBoardActivity extends Activity {
 				oldMidPoint = getMidPoint(event);
 				break;
 			}
-		} else {
-			boardEntity.onEntityTouchEvent(event);
-		}
+		} 
 
 		return false;
 	}

@@ -42,12 +42,88 @@
     <!-- 底部参数选择条 -->
     
     <!-- 手绘模式底部参数选择条 -->
-    <RadioGroup android:id="@+id/handdraw_conf_bar"
+    <LinearLayout android:id="@+id/handdraw_conf_layout"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:padding="5dp"
         android:background="@drawable/footerbar_bg" >
         
+        <!-- 笔触粗细按钮 -->
+        <ToggleButton android:id="@+id/handraw_conf_width_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:textOn=""
+            android:textOff=""
+            android:background="@drawable/handdraw_btn"/>
+        
+        <!-- 笔触颜色按钮 -->
+        <ToggleButton android:id="@+id/handraw_conf_color_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:textOn=""
+            android:textOff=""
+            android:background="@drawable/handdraw_btn"/>
+        
+        <!-- 橡皮按钮 -->
+        <ToggleButton android:id="@+id/handraw_conf_eraser_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:textOn=""
+            android:textOff=""
+            android:background="@drawable/handdraw_btn"/>
+        
+    </LinearLayout>
+    
+    <!-- 手绘模式底部粗细参数选择条 -->
+    <RadioGroup android:id="@+id/handraw_width_group"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="40dp"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:background="@drawable/subbar_bg">
+        <RadioButton android:id="@+id/handraw_width_1"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_blue"/>
+        <RadioButton android:id="@+id/handraw_width_2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_orange"/>
+        <RadioButton android:id="@+id/handraw_width_3"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_green"/>
+        <RadioButton android:id="@+id/handraw_width_4"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_red"/>
+        <RadioButton android:id="@+id/handraw_width_5"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_purple"/>
+        <RadioButton android:id="@+id/handraw_width_6"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:button="@null"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/note_style_gray"/>
     </RadioGroup>
     
     <!-- 便签模式底部参数选择条 -->
