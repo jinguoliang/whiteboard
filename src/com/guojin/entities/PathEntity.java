@@ -13,23 +13,23 @@ import android.view.MotionEvent;
 
 public class PathEntity implements Entity {
 	private static final String TAG = "PathEntity";
-	Matrix mMatrix;
-	Paint mPaint;
 	
 	BoardEntity board;
-	double originalScale;
-	double boardX, boardY;
-	double currentScale;
-	Path mPath;
+	Matrix mMatrix;
+	Paint mPaint;
+
+	double originalScale;				//存储
+	double boardX, boardY;		//存储
+	double currentScale;				//存储
+	Path mPath;										//存储
+	private float paintSize;			//存储
+	//相对屏幕左上角的坐标
 	private float sx;
 	private float sy;
-	private float paintSize;
 	
-	private int pathMode;
 
 	public PathEntity(BoardEntity b, Path path, Paint paint,float x,float y) {
 		this.board = b;
-		this.pathMode=(paint.getXfermode()==null?PathFactory.PATH_MODE_PAINT:PathFactory.PATH_MODE_ERASER);
 		this.originalScale = b.getTotalScale();
 		this.currentScale=originalScale;
 		this.sx=x;
