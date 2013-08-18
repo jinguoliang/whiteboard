@@ -71,8 +71,10 @@ public class PictureEntity implements Entity {
 
 		// 初始化
 		double tmpXY[]=board.screenToBoardCoodTrans(x, y);
-		this.centerXonBoard = tmpXY[0];
-		this.centerYonBoard = tmpXY[1];
+//		this.centerXonBoard = tmpXY[0];
+//		this.centerYonBoard = tmpXY[1];
+		this.centerXonBoard = x;
+		this.centerYonBoard = y;
 		this.scale = 1;
 		this.rotate = 0;
 		this.isFocused = false;
