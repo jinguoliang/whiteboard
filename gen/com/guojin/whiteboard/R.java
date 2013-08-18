@@ -39,27 +39,28 @@ public final class R {
     }
     public static final class id {
         public static final int board_framelayout=0x7f070000;
-        public static final int entity_note_edittext=0x7f070016;
-        public static final int entity_note_layout=0x7f070015;
-        public static final int handdraw_btn=0x7f070003;
+        public static final int entity_note_edittext=0x7f070017;
+        public static final int entity_note_layout=0x7f070016;
         public static final int handdraw_conf_bar=0x7f070006;
+        public static final int mode_handdraw_btn=0x7f070003;
+        public static final int mode_notedraw_btn=0x7f070005;
+        public static final int mode_picdraw_btn=0x7f070004;
         public static final int modesel_group=0x7f070002;
+        public static final int note_add_new=0x7f07000a;
         public static final int note_conf_layout=0x7f070007;
         public static final int note_conf_style_btn=0x7f070008;
         public static final int note_conf_textsize_btn=0x7f070009;
-        public static final int note_style_blue=0x7f07000b;
-        public static final int note_style_gray=0x7f070010;
-        public static final int note_style_green=0x7f07000d;
-        public static final int note_style_group=0x7f07000a;
-        public static final int note_style_orange=0x7f07000c;
-        public static final int note_style_purple=0x7f07000f;
-        public static final int note_style_red=0x7f07000e;
-        public static final int note_textsize_layout=0x7f070011;
-        public static final int note_textsize_sbar=0x7f070013;
-        public static final int note_textsize_txt=0x7f070012;
-        public static final int notedraw_btn=0x7f070005;
-        public static final int picdraw_btn=0x7f070004;
-        public static final int scale_ratio_txt=0x7f070014;
+        public static final int note_style_blue=0x7f07000c;
+        public static final int note_style_gray=0x7f070011;
+        public static final int note_style_green=0x7f07000e;
+        public static final int note_style_group=0x7f07000b;
+        public static final int note_style_orange=0x7f07000d;
+        public static final int note_style_purple=0x7f070010;
+        public static final int note_style_red=0x7f07000f;
+        public static final int note_textsize_layout=0x7f070012;
+        public static final int note_textsize_sbar=0x7f070014;
+        public static final int note_textsize_txt=0x7f070013;
+        public static final int scale_ratio_txt=0x7f070015;
         public static final int topbar_layout=0x7f070001;
     }
     public static final class layout {

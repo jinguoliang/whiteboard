@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.RelativeLayout;
@@ -24,6 +26,9 @@ public class WhiteBoardActivity extends Activity {
 	private float oldDist = Float.NaN;	// 两触点之间的旧距离值
 	private PointF oldMidPoint;			// 旧两触点中心点
 	
+	private boolean isTwoPointTouch = false;
+	private long firstTouchTime = -1;
+	
 	private BoardEntity boardEntity = null;	// Board实体
 	
 	private BoardView boardView;	// Board View
@@ -33,6 +38,7 @@ public class WhiteBoardActivity extends Activity {
 	private RadioGroup handDrawModeConfGroup;		// 手绘模式配置单选组
 	
 	private LinearLayout noteModeConfLayout;		// 便签模式总配置Layout
+	private Button noteAddNewBtn;
 	private ToggleButton noteTextSizeBtn;	// 便签字体大小设置按钮
 	private ToggleButton noteStyleBtn;		// 便签样式设置按钮
 	
@@ -85,7 +91,14 @@ public class WhiteBoardActivity extends Activity {
 		});
 		noteTextSizeBtn = (ToggleButton)findViewById(R.id.note_conf_textsize_btn);
 		noteStyleBtn = (ToggleButton)findViewById(R.id.note_conf_style_btn);
-		
+		// 添加新便签按钮
+		noteAddNewBtn = (Button)findViewById(R.id.note_add_new);
+		noteAddNewBtn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				boardEntity.addEntity();
+			}
+		});
 		noteStyleConfGroup = (RadioGroup)findViewById(R.id.note_style_group);
 		noteStyleConfGroup.setOnClickListener(new OnClickListener() {
 			@Override
@@ -111,23 +124,27 @@ public class WhiteBoardActivity extends Activity {
 			@Override
 			public void onCheckedChanged(RadioGroup group, int checkedId) {
 				switch (group.getCheckedRadioButtonId()) {
-				case R.id.handdraw_btn:
+				case R.id.mode_handdraw_btn:
 					// 手绘模式
 					handDrawModeConfGroup.setVisibility(View.VISIBLE);
 					noteModeConfLayout.setVisibility(View.GONE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);
 					
+					// 修改模式
+					boardEntity.changeMode(BoardEntity.MODE_HANDDRAW);
 					break;
-				case R.id.picdraw_btn:
+				case R.id.mode_picdraw_btn:
 					// 图片模式
 					handDrawModeConfGroup.setVisibility(View.GONE);
 					noteModeConfLayout.setVisibility(View.GONE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);
 					
+					// 修改模式
+					boardEntity.changeMode(BoardEntity.MODE_PIC);
 					break;
-				case R.id.notedraw_btn:
+				case R.id.mode_notedraw_btn:
 					// 便签模式
 					handDrawModeConfGroup.setVisibility(View.GONE);
 					noteModeConfLayout.setVisibility(View.VISIBLE);
@@ -136,10 +153,13 @@ public class WhiteBoardActivity extends Activity {
 					noteStyleBtn.setChecked(false);
 					noteTextSizeBtn.setChecked(false);
 					
+					// 修改模式
+					boardEntity.changeMode(BoardEntity.MODE_NOTE);
 					break;
 				}
 			}
 		});
+		((RadioButton)modeSelectGroup.findViewById(R.id.mode_handdraw_btn)).setChecked(true);
 		
 		// 便签字体设置按钮监听
 		noteTextSizeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -231,6 +251,7 @@ public class WhiteBoardActivity extends Activity {
 		
 		// 触点数目
 		int pointerCount = event.getPointerCount();
+		
 		// 缩放比例
 		float scale = 1;
 		// 偏移距离
@@ -282,7 +303,6 @@ public class WhiteBoardActivity extends Activity {
 //				Log.d("DevLog", String.format("Scale: %f\nDist: %f , %f", scale, dx, dy));
 				break;
 			case MotionEvent.ACTION_POINTER_UP:
-//				Log.d("DevLog", "Action up");
 				break;
 			case MotionEvent.ACTION_POINTER_DOWN:
 				oldDist = getPointsDist(event);
