@@ -1,40 +1,65 @@
 package com.guojin.entities;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
 import android.view.MotionEvent;
 
 public class PathFactory {
 	private static final float TOUCH_TOLERANCE = 5;
-	private List<Entity> pathList;
+	public static final int PATH_MODE_PAINT = 0x01;
+	public static final int PATH_MODE_ERASER = 0x02;
+	public static final int PATH_MODE_ERASER2 = 0x03;
+
+	private int currentPathMode;
+
+	private List<Entity> entityList;
 	private float sX;
 	private float sY;
 	private Paint mPaint;
 	private Path cPath;
-	private Matrix mMatrix;
 
 	private float paitn_width = 0;
-	private boolean isEraser;
 	private BoardEntity board;
 	private float px;
 	private float py;
 
-	public PathFactory(BoardEntity b,List<Entity> list) {
-		this.pathList = list;
-		this.board=b;
+	public void changePathMode(int mode) {
+		this.currentPathMode = mode;
+		switch (mode) {
+		case PATH_MODE_PAINT:
+			mPaint.setXfermode(null);
+			break;
+		case PATH_MODE_ERASER:
+			mPaint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+			break;
+		case PATH_MODE_ERASER2:
+			mPaint.setXfermode(null);
+			break;
+
+		}
+	}
+
+	public PathFactory(BoardEntity b, List<Entity> list) {
+		this.entityList = list;
+		this.board = b;
 
 		paitn_width = 10f;
-		mMatrix = new Matrix();
 		cPath = new Path();
 		mPaint = new Paint();
 		mPaint.setStyle(Paint.Style.STROKE);
 		mPaint.setAntiAlias(true);
 		mPaint.setStrokeCap(Paint.Cap.ROUND);
 		mPaint.setStrokeJoin(Paint.Join.ROUND);
+
+		changePathMode(PATH_MODE_ERASER2);
 	}
 
 	public void draw(Canvas canvas) {
@@ -46,8 +71,8 @@ public class PathFactory {
 	private void touch_start(float x, float y) {
 		cPath.reset();
 		cPath.moveTo(x, y);
-		px=sX = x;
-		py=sY = y;
+		px = sX = x;
+		py = sY = y;
 	}
 
 	private void touch_move(float x, float y) {
@@ -64,8 +89,10 @@ public class PathFactory {
 
 	private void touch_up() {
 		cPath.lineTo(sX, sY);
-		// 当抬起时，一个笔触结束，于是，将其画到mBitmap上，并添加到pathList上
-		pathList.add(new PathEntity(this.board,cPath, mPaint,px,py));
+		// 当抬起时，如果不是橡皮,一个笔触结束，于是，将其画到mBitmap上，并添加到pathList上
+		if (currentPathMode != PathFactory.PATH_MODE_ERASER2) {
+			entityList.add(new PathEntity(this.board, cPath, mPaint, px, py));
+		}
 		// 重置cPath以便下一次重用
 		cPath.reset();
 	}
@@ -74,6 +101,28 @@ public class PathFactory {
 		// 当前触点
 		float x = event.getX();
 		float y = event.getY();
+
+		//如果是清楚笔触模式,则根据触点位置查找笔触,删掉它
+		if (currentPathMode == PATH_MODE_ERASER2) {
+			List<Entity> tmplist = new ArrayList<Entity>();
+			for (Iterator<Entity> iterator = this.entityList.iterator(); iterator
+					.hasNext();) {
+				Entity entity = (Entity) iterator.next();
+				if (entity.getType() == BoardEntity.TYPE_PATH_ENTITY) {
+
+					if (((PathEntity) entity).containPoint(new Point((int) x,
+							(int) y))) {
+						tmplist.add(entity);
+					}
+				}
+			}
+			for (Iterator<Entity> iterator = tmplist.iterator(); iterator
+					.hasNext();) {
+				PathEntity pathEntity = (PathEntity) iterator.next();
+				entityList.remove(pathEntity);
+			}
+		}
+
 		// 判断action
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:// 刚按下
