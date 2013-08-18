@@ -401,8 +401,8 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 		
 		switch (vertex) {
 		case PictureEntity.a_right_bottom:
-			ddx = x - this.center.x+this.swidth/2;
-			ddy = y - this.center.y+this.sheight/2;
+			ddx = x - this.sltp.x;
+			ddy = y -this.sltp.y;
 			break;
 		case PictureEntity.a_right_top:
 			ddx = x - this.center.x+this.swidth/2;
@@ -423,6 +423,7 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 				+ Math.pow(this.sheight, 2));
 		float tmp=scale;
 		scale = d1/ d2;
+		Log.e(TAG,"scale="+scale);
 		
 		// 中心偏移的距离
 		double dl = (float) Math.sqrt(Math.pow(
@@ -505,7 +506,6 @@ public class PictureEntity implements Entity, HandleTouchEvent {
 			sy = cy;
 			break;
 		case MotionEvent.ACTION_MOVE:
-			Log.e(TAG, "cx=" + cx + "," + "sx=" + sx);
 			if (Math.abs(cx - sx) > 5 || Math.abs(cy - sy) > 5) {
 				onTouchMove(sx, sy, cx, cy);
 				sx = cx;
