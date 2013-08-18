@@ -18,19 +18,19 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:background="#00ffffff">
-            <RadioButton android:id="@+id/handdraw_btn"
+            <RadioButton android:id="@+id/mode_handdraw_btn"
                 android:layout_height="match_parent"
                 android:layout_width="30dp"
                 android:button="@null"
                 android:background="@drawable/handdraw_btn"
                 android:layout_marginRight="5dp" />
-            <RadioButton android:id="@+id/picdraw_btn"
+            <RadioButton android:id="@+id/mode_picdraw_btn"
                 android:layout_height="match_parent"
                 android:layout_width="30dp"
                 android:button="@null"
                 android:background="@drawable/handdraw_btn"
                 android:layout_marginRight="5dp" />
-            <RadioButton android:id="@+id/notedraw_btn"
+            <RadioButton android:id="@+id/mode_notedraw_btn"
                 android:layout_height="match_parent"
                 android:layout_width="30dp"
                 android:button="@null"
@@ -76,6 +76,11 @@
             android:textOff=""
             android:background="@drawable/handdraw_btn"/>
         
+        <Button android:id="@+id/note_add_new"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/handdraw_btn"/>
     </LinearLayout>
     
     <!-- 便签模式底部样式参数选择条 -->

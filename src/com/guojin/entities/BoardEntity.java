@@ -168,6 +168,34 @@ public class BoardEntity {
 	}
 
 	/**
+	 * 更改模式
+	 * @param mode
+	 */
+	public void changeMode(int mode) {
+		if (this.mode != mode) {
+			this.mode = mode;
+			if (focusedEntity != null) {
+				focusedEntity.removeFocus();
+				entityList.add(originEntityIndex, focusedEntity);
+				focusedEntity = null;
+			}
+		}
+	}
+	
+	/**
+	 * 添加实体
+	 * @param mode
+	 */
+	public void addEntity() {
+		switch (mode) {
+		case MODE_NOTE:
+			entityList.add(new NoteEntity(this, context));
+			break;
+		}
+		invalidateView();
+	}
+	
+	/**
 	 * 屏幕触摸方法
 	 * 
 	 * @param event
@@ -199,16 +227,19 @@ public class BoardEntity {
 					// 便利查找获取焦点的实体
 					for (int i = entityList.size() - 1; i >= 0; i--) {
 						Entity e = entityList.get(i);
-						if (!isCapture
-								&& e.isInRange(event.getX(), event.getY())) {
-							isCapture = true;
-							originEntityIndex = i;
-							entityList.remove(i);
-
-							e.onEntityTouchEvent(event);
-							focusedEntity = e;
-							break;
+						if (mode == MODE_NOTE && e.getType() == TYPE_NOTE_ENTITY
+								|| mode == MODE_PIC && e.getType() == TYPE_PIC_ENTITY) {
+							if (!isCapture && e.isInRange(event.getX(), event.getY())) {
+								isCapture = true;
+								originEntityIndex = i;
+								entityList.remove(i);
+								
+								e.onEntityTouchEvent(event);
+								focusedEntity = e;
+								break;
+							}
 						}
+						
 					}
 
 					// 如果点击位置不再任何entity上则要添加新的entity
