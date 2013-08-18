@@ -406,16 +406,16 @@ public class PictureEntity implements Entity {
 			ddy = y -this.sltp.y;
 			break;
 		case PictureEntity.a_right_top:
-			ddx = x - this.center.x+this.swidth/2;
-			ddy = y - this.center.y-this.sheight/2;
+			ddx = x - this.slbp.x;
+			ddy = y - this.slbp.y;
 			break;
 		case PictureEntity.a_left_bottom:
-			ddx = x - this.center.x-this.swidth/2;
-			ddy = y - this.center.y+this.sheight/2;
+			ddx = x - this.srtp.x;
+			ddy = y - this.srtp.y;
 			break;
 		case PictureEntity.a_left_top:
-			ddx = x - this.center.x-this.swidth/2;
-			ddy = y - this.center.y-this.sheight/2;
+			ddx = x - this.srbp.x;
+			ddy = y - this.srbp.y;
 			break;
 
 		}
