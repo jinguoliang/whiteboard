@@ -393,8 +393,8 @@ public class WhiteBoardActivity extends Activity {
 							 intent.putExtra("crop", "true");
 							 intent.putExtra("aspectX", 1);// 裁剪框比例
 							 intent.putExtra("aspectY", 1);
-							 intent.putExtra("outputX", 180);// 输出图片大小
-							 intent.putExtra("outputY", 180);
+							 intent.putExtra("outputX", 400);// 输出图片大小
+							 intent.putExtra("outputY", 400);
 							startActivityForResult(
 									Intent.createChooser(intent, "选择图片"),
 									SELECT_PICTURE);
@@ -402,11 +402,11 @@ public class WhiteBoardActivity extends Activity {
 							Intent intent = new Intent(
 									MediaStore.ACTION_IMAGE_CAPTURE);
 							intent.putExtra("output", Uri.fromFile(tmpPicFile));
-							// intent.putExtra("crop", "true");
-							// intent.putExtra("aspectX", 1);// 裁剪框比例
-							// intent.putExtra("aspectY", 1);
-							// intent.putExtra("outputX", 180);// 输出图片大小
-							// intent.putExtra("outputY", 180);
+//							 intent.putExtra("crop", "true");
+//							 intent.putExtra("aspectX", 1);// 裁剪框比例
+//							 intent.putExtra("aspectY", 1);
+//							 intent.putExtra("outputX", 180);// 输出图片大小
+//							 intent.putExtra("outputY", 180);
 							startActivityForResult(intent, SELECT_CAMER);
 						}
 					}
