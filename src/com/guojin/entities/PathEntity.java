@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -23,9 +24,12 @@ public class PathEntity implements Entity {
 	private float sx;
 	private float sy;
 	private float paintSize;
+	
+	private int pathMode;
 
 	public PathEntity(BoardEntity b, Path path, Paint paint,float x,float y) {
 		this.board = b;
+		this.pathMode=(paint.getXfermode()==null?PathFactory.PATH_MODE_PAINT:PathFactory.PATH_MODE_ERASER);
 		this.originalScale = b.getTotalScale();
 		this.currentScale=originalScale;
 		this.sx=x;
@@ -101,5 +105,16 @@ public class PathEntity implements Entity {
 	@Override
 	public void removeFocus() {
 		// 空函数
+	}
+
+	public boolean containPoint(Point p) {
+		RectF bounds=new RectF();
+		mPath.computeBounds(bounds, true);
+		Region region=new Region();
+		region.setPath(mPath, new Region((int)bounds.left,(int)bounds.top,(int)bounds.right,(int)bounds.bottom));
+		if (region.contains(p.x, p.y)) {
+			return true;
+		}
+		return false;
 	}
 }

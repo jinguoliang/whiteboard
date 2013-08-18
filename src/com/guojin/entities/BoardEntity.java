@@ -21,7 +21,7 @@ public class BoardEntity {
 	public static final int MODE_PIC = 0x12;
 	public static final int MODE_NOTE = 0x13;
 
-	public int mode = MODE_PIC; // 当前模式
+	public int mode = MODE_HANDDRAW; // 当前模式
 
 	// 类型常量
 	public static final int TYPE_PIC_ENTITY = 0x01;
@@ -148,6 +148,7 @@ public class BoardEntity {
 		// 绘制纸张背景
 		paperEntity.draw(canvas);
 
+		canvas.saveLayer(0, 0, 800, 800, null, Canvas.ALL_SAVE_FLAG);
 		for (Entity e : entityList) {
 			e.draw(canvas);
 		}
@@ -163,6 +164,7 @@ public class BoardEntity {
 		}
 
 		pathFactory.draw(canvas);
+		canvas.restore();
 	}
 
 	/**
