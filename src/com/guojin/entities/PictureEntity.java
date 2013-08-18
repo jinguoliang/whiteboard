@@ -71,10 +71,8 @@ public class PictureEntity implements Entity {
 
 		// 初始化
 		double tmpXY[]=board.screenToBoardCoodTrans(x, y);
-//		this.centerXonBoard = tmpXY[0];
-//		this.centerYonBoard = tmpXY[1];
-		this.centerXonBoard = x;
-		this.centerYonBoard = y;
+		this.centerXonBoard = tmpXY[0];
+		this.centerYonBoard = tmpXY[1];
 		this.scale = 1;
 		this.rotate = 0;
 		this.isFocused = false;
@@ -426,6 +424,7 @@ public class PictureEntity implements Entity {
 				+ Math.pow(this.sheight, 2));
 		float tmp=scale;
 		scale = d1/ d2;
+		Log.e(TAG,"scale="+scale);
 		
 		// 中心偏移的距离
 		double dl = (float) Math.sqrt(Math.pow(
