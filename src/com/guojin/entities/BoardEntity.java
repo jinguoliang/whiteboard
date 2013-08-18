@@ -3,7 +3,7 @@ package com.guojin.entities;
 import java.util.LinkedList;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,7 +12,7 @@ import android.graphics.RectF;
 import android.view.MotionEvent;
 
 import com.guojin.whiteboard.BoardView;
-import com.guojin.whiteboard.R;
+import com.guojin.whiteboard.WhiteBoardActivity;
 
 public class BoardEntity {
 
@@ -20,21 +20,21 @@ public class BoardEntity {
 	public static final int MODE_HANDDRAW = 0x11;
 	public static final int MODE_PIC = 0x12;
 	public static final int MODE_NOTE = 0x13;
-	
-	public int mode = MODE_HANDDRAW;	// 当前模式
-	
+
+	public int mode = MODE_PIC; // 当前模式
+
 	// 类型常量
 	public static final int TYPE_PIC_ENTITY = 0x01;
 	public static final int TYPE_NOTE_ENTITY = 0x02;
 	public static final int TYPE_PATH_ENTITY = 0x03;
-	
+
 	// 缩放范围
 	public static final double MAX_TOTAL_SCALE = 3;
 	public static final double MIN_TOTAL_SCALE = 0.4;
-	
+
 	// 总缩放比例
 	private double totalScale = 1;
-	
+
 	// 总偏移量（相对于最初始位置）
 	private double totalOffsetX = 0;
 	private double totalOffsetY = 0;
@@ -53,23 +53,25 @@ public class BoardEntity {
 
 	// 纸张实体
 	private PaperEntity paperEntity;
-	
-	//将手绘的功能分离出来给PathFactory-------jinux
+
+	// 将手绘的功能分离出来给PathFactory
 	PathFactory pathFactory;
-	
+
 	// 实体链表
 	private LinkedList<Entity> entityList = new LinkedList<Entity>();
-	
+
 	// 标识是否已经有实体获取焦点
 	private boolean isCapture = false;
-	
+
 	// 当前已经获取焦点的Entity
 	private Entity focusedEntity = null;
 	// 获取到焦点的Entity的原位置
 	private int originEntityIndex = -1;
-	
+
 	// 遮盖层
 	private Paint coverPaint = new Paint();
+	private float picInsertX;
+	private float picInsertY;
 
 	/**
 	 * 构造函数
@@ -81,11 +83,11 @@ public class BoardEntity {
 		// 初始化画笔
 		coverPaint.setAntiAlias(true);
 		coverPaint.setColor(Color.argb(150, 200, 200, 200));
-		
+
 		// 初始化纸张实体
 		paperEntity = new PaperEntity(this, PaperEntity.GRID_PAPER);
-		//----------jinux
-		pathFactory=new PathFactory(this,this.entityList);
+		// pathFactory用于分担手绘的任务
+		pathFactory = new PathFactory(this, this.entityList);
 		loadEntity();
 	}
 
@@ -94,35 +96,38 @@ public class BoardEntity {
 	 */
 	private void loadEntity() {
 		entityList.add(new NoteEntity(this, context));
-		
-		entityList.add(new PictureEntity(this, BitmapFactory.decodeResource(
-				this.context.getResources(), R.drawable.test), 200, 200));
+
 	}
-	
+
 	/**
 	 * 设置便签字体大小
+	 * 
 	 * @param textSize
 	 */
 	public void setNoteTextSize(float textSize) {
-		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
-			((NoteEntity)focusedEntity).setTextSize(textSize);
+		if (focusedEntity != null
+				&& focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity) focusedEntity).setTextSize(textSize);
 			invalidateView();
 		}
 	}
-	
+
 	/**
 	 * 设置便签样式颜色
+	 * 
 	 * @param color
 	 */
 	public void setNoteStyleColor(int color) {
-		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
-			((NoteEntity)focusedEntity).setStyleColor(color);
+		if (focusedEntity != null
+				&& focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity) focusedEntity).setStyleColor(color);
 			invalidateView();
 		}
 	}
-	
+
 	/**
 	 * 删除一个实体
+	 * 
 	 * @param entity
 	 */
 	public void delEntity(Entity entity) {
@@ -133,7 +138,7 @@ public class BoardEntity {
 		}
 		invalidateView();
 	}
-	
+
 	/**
 	 * 绘制方法
 	 * 
@@ -142,21 +147,21 @@ public class BoardEntity {
 	public void draw(Canvas canvas) {
 		// 绘制纸张背景
 		paperEntity.draw(canvas);
-		
+
 		for (Entity e : entityList) {
 			e.draw(canvas);
 		}
-		
+
 		// 绘制获取焦点的实体
 		if (focusedEntity != null) {
 			int[] loc = new int[2];
 			mBindedView.getLocationOnScreen(loc);
-			RectF bounds = new RectF(0, 0
-					, mBindedView.getWidth(), mBindedView.getHeight());
+			RectF bounds = new RectF(0, 0, mBindedView.getWidth(),
+					mBindedView.getHeight());
 			canvas.drawRect(bounds, coverPaint);
 			focusedEntity.draw(canvas);
 		}
-		
+
 		pathFactory.draw(canvas);
 	}
 
@@ -176,10 +181,10 @@ public class BoardEntity {
 		// 图片模式或便签模式下
 		if (mode == MODE_PIC || mode == MODE_NOTE) {
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				if (focusedEntity != null && focusedEntity.isInRange(event.getX(), event.getY())) {
+				if (focusedEntity != null
+						&& focusedEntity.isInRange(event.getX(), event.getY())) {
 					// 如果点击位置在已经获取焦点的实体范围内
-					
-					
+
 					focusedEntity.onEntityTouchEvent(event);
 				} else {
 					if (focusedEntity != null) {
@@ -187,21 +192,37 @@ public class BoardEntity {
 						entityList.add(originEntityIndex, focusedEntity);
 						focusedEntity = null;
 					}
-					
+
 					isCapture = false;
 					// 便利查找获取焦点的实体
 					for (int i = entityList.size() - 1; i >= 0; i--) {
 						Entity e = entityList.get(i);
-						if (!isCapture && e.isInRange(event.getX(), event.getY())) {
+						if (!isCapture
+								&& e.isInRange(event.getX(), event.getY())) {
 							isCapture = true;
 							originEntityIndex = i;
 							entityList.remove(i);
-							
+
 							e.onEntityTouchEvent(event);
 							focusedEntity = e;
 							break;
 						}
 					}
+
+					// 如果点击位置不再任何entity上则要添加新的entity
+					if (focusedEntity == null) {
+						switch (this.mode) {
+						case BoardEntity.MODE_PIC:
+							this.picInsertX=event.getX();
+							this.picInsertY=event.getY();
+							((WhiteBoardActivity) (context)).loadPicture();
+							break;
+						case BoardEntity.MODE_NOTE:
+
+							break;
+						}
+					}
+
 				}
 			} else {
 				if (focusedEntity != null) {
@@ -213,10 +234,7 @@ public class BoardEntity {
 			pathFactory.onTouch(event);
 			invalidateView();
 		}
-		
-		
-		
-		
+
 	}
 
 	/**
@@ -274,33 +292,39 @@ public class BoardEntity {
 
 	/**
 	 * 提交输入的文本
-	 * @param text 需要提交的文本
-	 * @param isNewLine 是否为新起一行，如果为true，参数text可以为null
+	 * 
+	 * @param text
+	 *            需要提交的文本
+	 * @param isNewLine
+	 *            是否为新起一行，如果为true，参数text可以为null
 	 */
 	public void commitInputText(String text, boolean isNewLine) {
-		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
-			((NoteEntity)focusedEntity).commitInputText(text, isNewLine);
+		if (focusedEntity != null
+				&& focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity) focusedEntity).commitInputText(text, isNewLine);
 		}
 	}
-	
+
 	/**
 	 * 删除之前提交的一个文本字符
 	 */
 	public void delPrevInputText() {
-		if (focusedEntity != null && focusedEntity.getType() == TYPE_NOTE_ENTITY) {
-			((NoteEntity)focusedEntity).delPrevInputText();
+		if (focusedEntity != null
+				&& focusedEntity.getType() == TYPE_NOTE_ENTITY) {
+			((NoteEntity) focusedEntity).delPrevInputText();
 		}
 	}
-	
+
 	/**
 	 * 切换软键盘显示
-	 * @param open true-显示    false-关闭
+	 * 
+	 * @param open
+	 *            true-显示 false-关闭
 	 */
 	public void toggleInput(boolean open) {
 		mBindedView.toggleInput(open);
 	}
-	
-	
+
 	/**
 	 * 画板坐标到屏幕坐标转换
 	 * 
@@ -375,10 +399,11 @@ public class BoardEntity {
 		float bmy = (float) (smy / totalScale - totalOffsetY);
 
 		// 计算总缩放比例
-		if (totalScale * scale > MIN_TOTAL_SCALE && totalScale * scale < MAX_TOTAL_SCALE) {
+		if (totalScale * scale > MIN_TOTAL_SCALE
+				&& totalScale * scale < MAX_TOTAL_SCALE) {
 			totalScale *= scale;
 		}
-		
+
 		totalOffsetX = smx / totalScale - bmx;
 		totalOffsetY = smy / totalScale - bmy;
 
@@ -400,5 +425,14 @@ public class BoardEntity {
 
 		// Log.d("DevLog", String.format("(%f,%f,%f,%f)", drawRangeLeft,
 		// drawRangeTop, drawRangeRight, drawRangeBottom));
+	}
+	
+	/**
+	 * 与WhiteBoardActivity的loadPicture配对使用，当它获取到图片后会调用该函数将其传入进来
+	 * @param b
+	 */
+	public void receivePicture(Bitmap b) {
+		entityList.add(new PictureEntity(this,b ,picInsertX, picInsertY));
+		invalidateView();
 	}
 }
