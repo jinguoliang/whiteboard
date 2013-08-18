@@ -402,20 +402,20 @@ public class PictureEntity implements Entity {
 		
 		switch (vertex) {
 		case PictureEntity.a_right_bottom:
-			ddx = x - this.center.x+this.swidth/2;
-			ddy = y - this.center.y+this.sheight/2;
+			ddx = x - this.sltp.x;
+			ddy = y -this.sltp.y;
 			break;
 		case PictureEntity.a_right_top:
-			ddx = x - this.center.x+this.swidth/2;
-			ddy = y - this.center.y-this.sheight/2;
+			ddx = x - this.slbp.x;
+			ddy = y - this.slbp.y;
 			break;
 		case PictureEntity.a_left_bottom:
-			ddx = x - this.center.x-this.swidth/2;
-			ddy = y - this.center.y+this.sheight/2;
+			ddx = x - this.srtp.x;
+			ddy = y - this.srtp.y;
 			break;
 		case PictureEntity.a_left_top:
-			ddx = x - this.center.x-this.swidth/2;
-			ddy = y - this.center.y-this.sheight/2;
+			ddx = x - this.srbp.x;
+			ddy = y - this.srbp.y;
 			break;
 
 		}
@@ -424,6 +424,7 @@ public class PictureEntity implements Entity {
 				+ Math.pow(this.sheight, 2));
 		float tmp=scale;
 		scale = d1/ d2;
+		Log.e(TAG,"scale="+scale);
 		
 		// 中心偏移的距离
 		double dl = (float) Math.sqrt(Math.pow(
@@ -509,7 +510,6 @@ public class PictureEntity implements Entity {
 
 			break;
 		case MotionEvent.ACTION_MOVE:
-			Log.e(TAG, "cx=" + cx + "," + "sx=" + sx);
 			if (Math.abs(cx - sx) > 5 || Math.abs(cy - sy) > 5) {
 				onTouchMove(sx, sy, cx, cy);
 				sx = cx;

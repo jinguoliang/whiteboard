@@ -59,7 +59,7 @@ public class PathFactory {
 		mPaint.setStrokeCap(Paint.Cap.ROUND);
 		mPaint.setStrokeJoin(Paint.Join.ROUND);
 
-		changePathMode(PATH_MODE_ERASER2);
+		changePathMode(PATH_MODE_ERASER);
 	}
 
 	public void draw(Canvas canvas) {
