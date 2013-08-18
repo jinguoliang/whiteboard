@@ -51,7 +51,7 @@ public class WhiteBoardActivity extends Activity {
 	private RelativeLayout topbarLayout;
 	
 	private RadioGroup modeSelectGroup; // 模式单选组
-	private RadioGroup handDrawModeConfGroup; // 手绘模式配置单选组
+	private LinearLayout handDrawModeConfLayout; // 手绘模式配置Layout
 	private ToggleButton handDrawModeEraserBtn;	// 橡皮擦切换按钮
 
 	private LinearLayout noteModeConfLayout; // 便签模式总配置Layout
@@ -104,7 +104,7 @@ public class WhiteBoardActivity extends Activity {
 
 		// 模式选择
 		modeSelectGroup = (RadioGroup) findViewById(R.id.modesel_group);
-		handDrawModeConfGroup = (RadioGroup) findViewById(R.id.handdraw_conf_layout);
+		handDrawModeConfLayout = (LinearLayout) findViewById(R.id.handdraw_conf_layout);
 		// 橡皮切换按钮
 		handDrawModeEraserBtn = (ToggleButton)findViewById(R.id.handraw_conf_eraser_btn);
 		handDrawModeEraserBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -163,7 +163,7 @@ public class WhiteBoardActivity extends Activity {
 				switch (group.getCheckedRadioButtonId()) {
 				case R.id.mode_handdraw_btn:
 					// 手绘模式
-					handDrawModeConfGroup.setVisibility(View.VISIBLE);
+					handDrawModeConfLayout.setVisibility(View.VISIBLE);
 					noteModeConfLayout.setVisibility(View.GONE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);
@@ -173,7 +173,7 @@ public class WhiteBoardActivity extends Activity {
 					break;
 				case R.id.mode_picdraw_btn:
 					// 图片模式
-					handDrawModeConfGroup.setVisibility(View.GONE);
+					handDrawModeConfLayout.setVisibility(View.GONE);
 					noteModeConfLayout.setVisibility(View.GONE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);
@@ -183,7 +183,7 @@ public class WhiteBoardActivity extends Activity {
 					break;
 				case R.id.mode_notedraw_btn:
 					// 便签模式
-					handDrawModeConfGroup.setVisibility(View.GONE);
+					handDrawModeConfLayout.setVisibility(View.GONE);
 					noteModeConfLayout.setVisibility(View.VISIBLE);
 					noteStyleConfGroup.setVisibility(View.GONE);
 					noteTextSizeConfLayout.setVisibility(View.GONE);

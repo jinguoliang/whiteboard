@@ -93,7 +93,7 @@
             android:layout_height="30dp"
             android:button="@null"
             android:layout_marginRight="10dp"
-            android:background="@drawable/note_style_blue"/>
+            android:background="@drawable/handraw_width1"/>
         <RadioButton android:id="@+id/handraw_width_2"
             android:layout_width="30dp"
             android:layout_height="30dp"

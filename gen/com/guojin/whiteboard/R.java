@@ -11,6 +11,8 @@ public final class R {
     public static final class attr {
     }
     public static final class color {
+        public static final int handraw_width_bg=0x7f040007;
+        public static final int handraw_width_sel=0x7f040008;
         public static final int note_style_blue=0x7f040002;
         public static final int note_style_gray=0x7f040001;
         public static final int note_style_green=0x7f040003;
@@ -24,18 +26,19 @@ public final class R {
         public static final int handdraw_btn=0x7f020001;
         public static final int handdraw_btn_checked=0x7f020002;
         public static final int handdraw_btn_unchecked=0x7f020003;
-        public static final int ic_launcher=0x7f020004;
-        public static final int note_style_blue=0x7f020005;
-        public static final int note_style_gray=0x7f020006;
-        public static final int note_style_green=0x7f020007;
-        public static final int note_style_orange=0x7f020008;
-        public static final int note_style_purple=0x7f020009;
-        public static final int note_style_red=0x7f02000a;
-        public static final int note_textsize_seek=0x7f02000b;
-        public static final int note_textsize_thumb=0x7f02000c;
-        public static final int subbar_bg=0x7f02000d;
-        public static final int test=0x7f02000e;
-        public static final int topbar_bg=0x7f02000f;
+        public static final int handraw_width1=0x7f020004;
+        public static final int ic_launcher=0x7f020005;
+        public static final int note_style_blue=0x7f020006;
+        public static final int note_style_gray=0x7f020007;
+        public static final int note_style_green=0x7f020008;
+        public static final int note_style_orange=0x7f020009;
+        public static final int note_style_purple=0x7f02000a;
+        public static final int note_style_red=0x7f02000b;
+        public static final int note_textsize_seek=0x7f02000c;
+        public static final int note_textsize_thumb=0x7f02000d;
+        public static final int subbar_bg=0x7f02000e;
+        public static final int test=0x7f02000f;
+        public static final int topbar_bg=0x7f020010;
     }
     public static final class id {
         public static final int board_framelayout=0x7f070000;
