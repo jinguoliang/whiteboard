@@ -402,8 +402,8 @@ public class PictureEntity implements Entity {
 		
 		switch (vertex) {
 		case PictureEntity.a_right_bottom:
-			ddx = x - this.center.x+this.swidth/2;
-			ddy = y - this.center.y+this.sheight/2;
+			ddx = x - this.sltp.x;
+			ddy = y -this.sltp.y;
 			break;
 		case PictureEntity.a_right_top:
 			ddx = x - this.center.x+this.swidth/2;
@@ -510,7 +510,6 @@ public class PictureEntity implements Entity {
 
 			break;
 		case MotionEvent.ACTION_MOVE:
-			Log.e(TAG, "cx=" + cx + "," + "sx=" + sx);
 			if (Math.abs(cx - sx) > 5 || Math.abs(cy - sy) > 5) {
 				onTouchMove(sx, sy, cx, cy);
 				sx = cx;
