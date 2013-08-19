@@ -469,4 +469,8 @@ public class BoardEntity {
 		entityList.add(new PictureEntity(this,b ,picInsertX, picInsertY));
 		invalidateView();
 	}
+
+	public PathFactory getPathFactory() {
+		return this.pathFactory;
+	}
 }
