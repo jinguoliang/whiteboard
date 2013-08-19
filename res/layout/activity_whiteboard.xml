@@ -99,31 +99,31 @@
             android:layout_height="30dp"
             android:button="@null"
             android:layout_marginRight="10dp"
-            android:background="@drawable/note_style_orange"/>
+            android:background="@drawable/handraw_width1"/>
         <RadioButton android:id="@+id/handraw_width_3"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:button="@null"
             android:layout_marginRight="10dp"
-            android:background="@drawable/note_style_green"/>
+            android:background="@drawable/handraw_width1"/>
         <RadioButton android:id="@+id/handraw_width_4"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:button="@null"
             android:layout_marginRight="10dp"
-            android:background="@drawable/note_style_red"/>
+            android:background="@drawable/handraw_width1"/>
         <RadioButton android:id="@+id/handraw_width_5"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:button="@null"
             android:layout_marginRight="10dp"
-            android:background="@drawable/note_style_purple"/>
+            android:background="@drawable/handraw_width1"/>
         <RadioButton android:id="@+id/handraw_width_6"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:button="@null"
             android:layout_marginRight="10dp"
-            android:background="@drawable/note_style_gray"/>
+            android:background="@drawable/handraw_width1"/>
     </RadioGroup>
     
     <!-- 便签模式底部参数选择条 -->

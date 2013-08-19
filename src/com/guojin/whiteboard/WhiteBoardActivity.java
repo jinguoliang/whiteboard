@@ -119,6 +119,7 @@ public class WhiteBoardActivity extends Activity {
 			}
 		});
 		
+		
 		// 便签模式设置
 		noteModeConfLayout = (LinearLayout) findViewById(R.id.note_conf_layout);
 		noteModeConfLayout.setOnClickListener(new OnClickListener() {
