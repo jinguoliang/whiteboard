@@ -120,9 +120,9 @@ public class WhiteBoardActivity extends Activity {
 				PathFactory pathFactory=boardEntity.getPathFactory();
 				if (isChecked) {
 					oldPaintMode=pathFactory.getMode();
-					pathFactory.changePathMode(PathFactory.PATH_MODE_ERASER);
+					pathFactory.setPathMode(PathFactory.PATH_MODE_ERASER);
 				} else {
-					pathFactory.changePathMode(oldPaintMode);
+					pathFactory.setPathMode(oldPaintMode);
 				}
 			}
 		});
