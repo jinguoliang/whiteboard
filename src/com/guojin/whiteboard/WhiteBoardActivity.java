@@ -1,6 +1,7 @@
 package com.guojin.whiteboard;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.Activity;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.guojin.entities.BoardEntity;
+import com.guojin.entities.Entity;
 import com.guojin.entities.PathFactory;
 
 public class WhiteBoardActivity extends Activity {
@@ -406,6 +408,7 @@ public class WhiteBoardActivity extends Activity {
 				scaleTextView.setText((int) (boardEntity.getTotalScale() * 100)
 						+ "%");
 				boardView.postInvalidate();
+				
 
 				// Log.d("DevLog", String.format("Scale: %f\nDist: %f , %f",
 				// scale, dx, dy));

@@ -79,14 +79,6 @@ public class PathEntity implements Entity {
 		this.paintSize = mPaint.getStrokeWidth();
 	}
 
-	static PathEntity constructFromStr(String s) {
-
-		return null;
-	}
-
-	public String toString() {
-		return null;
-	};
 
 	PointF tmpScreenPoint;
 	double tmpScale;
@@ -157,7 +149,7 @@ public class PathEntity implements Entity {
 		// 空函数
 	}
 
-	final float precision = 5f;
+	static final float precision = 15f;
 
 	/**
 	 * 将point和path上的每一点进行距离计算,如果和某一点距离小于特定值,就表明该点在path上
@@ -166,11 +158,11 @@ public class PathEntity implements Entity {
 	 * @return
 	 */
 	public boolean containPoint(PointF point) {
-		ArrayList<PointF> list = getPointsArray();
+		ArrayList<PointF> list = getPointsArray(mPath);
 		Log.e(TAG, "list.size=" + list.size());
 		for (PointF p : list) {
 			float dist = distanceBetween(p, point);
-			if (dist - precision * 2.5 < 0) {
+			if (dist - precision  < 0) {
 				return true;
 			}
 		}
@@ -182,7 +174,7 @@ public class PathEntity implements Entity {
 	 * 
 	 * @return
 	 */
-	private ArrayList<PointF> getPointsArray() {
+	static ArrayList<PointF> getPointsArray(Path mPath) {
 		ArrayList<PointF> list = new ArrayList<PointF>();
 		PathMeasure pm = new PathMeasure(mPath, false);
 		float[] coords = null;

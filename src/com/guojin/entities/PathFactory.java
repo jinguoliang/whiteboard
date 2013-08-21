@@ -35,13 +35,12 @@ public class PathFactory {
 	 */
 	private float sX;
 	private float sY;
-	
+
 	private Paint mPaint;
 	private Path cPath;
-	private float paitnWidth ;
+	private float paitnWidth;
 	private int paintColor;
 
-	
 	private BoardEntity board;
 	private List<Entity> entityList;
 
@@ -61,12 +60,14 @@ public class PathFactory {
 		mPaint.setAntiAlias(true);
 		mPaint.setStrokeCap(Paint.Cap.ROUND);
 		mPaint.setStrokeJoin(Paint.Join.ROUND);
-		paintColor=Color.BLACK;
+		paintColor = Color.BLACK;
 
 		setPathMode(PATH_MODE_PAINT);
 	}
+
 	/**
 	 * 更改path的样式
+	 * 
 	 * @param mode
 	 */
 	public void setPathMode(int mode) {
@@ -119,6 +120,21 @@ public class PathFactory {
 			pathPoints.add(new PointF(sX, sY));
 			entityList
 					.add(new PathEntity(this.board, cPath, mPaint, pathPoints));
+		} else {
+			ArrayList<PointF> list = PathEntity.getPointsArray(cPath);
+			List<Entity> tmplist = new ArrayList<Entity>();
+			for (PointF p : list) {
+				for (Entity entity:entityList) {
+					if (entity.getType() == BoardEntity.TYPE_PATH_ENTITY) {
+						if (((PathEntity) entity).containPoint(p)) {
+							tmplist.add(entity);
+						}
+					}
+				}
+			}
+			for (Entity path:tmplist) {
+				entityList.remove(path);
+			}
 		}
 		// 重置cPath以便下一次重用
 		cPath.reset();
@@ -129,26 +145,7 @@ public class PathFactory {
 		float x = event.getX();
 		float y = event.getY();
 
-		// 如果是清除笔触模式,则根据触点位置查找笔触,删掉它
-		if (currentPathMode == PATH_MODE_ERASER) {
-			List<Entity> tmplist = new ArrayList<Entity>();
-			for (Iterator<Entity> iterator = this.entityList.iterator(); iterator
-					.hasNext();) {
-				Entity entity = (Entity) iterator.next();
-				if (entity.getType() == BoardEntity.TYPE_PATH_ENTITY) {
-
-					if (((PathEntity) entity).containPoint(new PointF(x, y))) {
-						tmplist.add(entity);
-					}
-				}
-			}
-			for (Iterator<Entity> iterator = tmplist.iterator(); iterator
-					.hasNext();) {
-				PathEntity pathEntity = (PathEntity) iterator.next();
-				entityList.remove(pathEntity);
-			}
-		}
-
+	
 		// 判断action
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:// 刚按下
