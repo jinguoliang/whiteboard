@@ -63,6 +63,7 @@ public class PictureEntity implements Entity {
 	private PointF srbp;
 	private PointF slbp;
 	private PointF stopp;
+	private PointF sbotp;
 	private PointF center;
 
 	// 触点当前位置和按下位置
@@ -82,7 +83,8 @@ public class PictureEntity implements Entity {
 	final static int a_right_bottom = 3;
 	final static int a_center = 4;
 	final static int a_rotate_handle = 5;
-	final static int a_out = 6;
+	final static int a_delete_handle = 6;
+	final static int a_out = 7;
 
 	public PictureEntity(BoardEntity board, Bitmap b, float x, float y) {
 		this.boardEntity = board;
@@ -138,6 +140,7 @@ public class PictureEntity implements Entity {
 		c.drawCircle(srtp.x, srtp.y, touchPointSize, p);
 		c.drawCircle(srbp.x, srbp.y, touchPointSize, p);
 		c.drawCircle(stopp.x, stopp.y, touchPointSize, p);
+		c.drawCircle(sbotp.x, sbotp.y, touchPointSize, p);
 		// 框
 		drawRect(sltp, srtp, srbp, slbp, c);
 
@@ -216,6 +219,7 @@ public class PictureEntity implements Entity {
 		srbp = new PointF(x + tmpx, y + tmpy);
 		slbp = new PointF(x - tmpx, y + tmpy);
 		stopp = new PointF(x, y - tmpy);
+		sbotp = new PointF(x, y + tmpy);
 
 		// 添加角度变换
 		sltp = rotateByPointF(x, y, sltp.x, sltp.y, this.rotate);
@@ -223,6 +227,7 @@ public class PictureEntity implements Entity {
 		slbp = rotateByPointF(x, y, slbp.x, slbp.y, this.rotate);
 		srtp = rotateByPointF(x, y, srtp.x, srtp.y, this.rotate);
 		stopp = rotateByPointF(x, y, stopp.x, stopp.y, this.rotate);
+		sbotp = rotateByPointF(x, y, sbotp.x, sbotp.y, this.rotate);
 
 		// 修正偏移
 		sltp.x += dx;
@@ -235,6 +240,8 @@ public class PictureEntity implements Entity {
 		srtp.y += dy;
 		stopp.x += dx;
 		stopp.y += dy;
+		sbotp.x += dx;
+		sbotp.y += dy;
 		center.x += dx;
 		center.y += dy;
 
@@ -406,6 +413,9 @@ public class PictureEntity implements Entity {
 				this.rotate += dAngle * sign;
 
 				break;
+			case a_delete_handle:
+				boardEntity.delEntity(this);
+				break;
 			}
 		}
 	}
@@ -487,7 +497,9 @@ public class PictureEntity implements Entity {
 			return a_right_bottom;
 		} else if (containPointF(stopp, x, y)) {
 			return a_rotate_handle;
-		} else if (containPointFInRect(x, y)) {
+		} else if (containPointF(sbotp, x, y)) {
+			return a_delete_handle;
+		}  else if (containPointFInRect(x, y)) {
 			return a_center;
 		} else {
 			return a_out;
@@ -514,7 +526,7 @@ public class PictureEntity implements Entity {
 	public boolean containPointFInContronPointF(float cx, float cy) {
 		if (containPointF(sltp, cx, cy) || containPointF(srtp, cx, cy)
 				|| containPointF(slbp, cx, cy) || containPointF(srbp, cx, cy)
-				|| containPointF(stopp, cx, cy)) {
+				|| containPointF(stopp, cx, cy)||containPointF(sbotp, cx, cy)) {
 			return true;
 		}
 		return false;

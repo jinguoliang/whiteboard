@@ -3,27 +3,36 @@ package com.guojin.whiteboard;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -31,10 +40,10 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.guojin.entities.BoardEntity;
-import com.guojin.entities.Entity;
 import com.guojin.entities.PathFactory;
 
 public class WhiteBoardActivity extends Activity {
@@ -43,6 +52,10 @@ public class WhiteBoardActivity extends Activity {
 	// 选择图片的方式
 	private static final int SELECT_PICTURE = 0;
 	private static final int SELECT_CAMER = 1;
+	private static final int SELECT_CROP = 2;
+	//裁剪宽高
+	int int_Height_crop = 250;
+	int int_Width_crop = 250;
 
 	private float oldDist = Float.NaN; // 两触点之间的旧距离值
 	private PointF oldMidPoint; // 旧两触点中心点
@@ -52,10 +65,10 @@ public class WhiteBoardActivity extends Activity {
 	private BoardView boardView; // Board View
 
 	private RelativeLayout topbarLayout;
-	
+
 	private RadioGroup modeSelectGroup; // 模式单选组
 	private LinearLayout handDrawModeConfLayout; // 手绘模式配置Layout
-	private ToggleButton handDrawModeEraserBtn;	// 橡皮擦切换按钮
+	private ToggleButton handDrawModeEraserBtn; // 橡皮擦切换按钮
 
 	private LinearLayout noteModeConfLayout; // 便签模式总配置Layout
 	private Button noteAddNewBtn;
@@ -70,15 +83,14 @@ public class WhiteBoardActivity extends Activity {
 
 	private TextView scaleTextView; // 缩放级别显示
 	protected File tmpPicFile;
-	
+
 	private float firstTouchX = -1;
 	private float firstTouchY = -1;
 	private boolean isOnePointAction = false;
 	private long firstTouchTime = -1;
-	
-	//记录切换到橡皮模式前笔触的模式
-	private int oldPaintMode=PathFactory.PATH_MODE_PAINT;
 
+	// 记录切换到橡皮模式前笔触的模式
+	private int oldPaintMode = PathFactory.PATH_MODE_PAINT;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,22 +125,24 @@ public class WhiteBoardActivity extends Activity {
 		modeSelectGroup = (RadioGroup) findViewById(R.id.modesel_group);
 		handDrawModeConfLayout = (LinearLayout) findViewById(R.id.handdraw_conf_layout);
 		// 橡皮切换按钮
-		handDrawModeEraserBtn = (ToggleButton)findViewById(R.id.handraw_conf_eraser_btn);
-		handDrawModeEraserBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			
+		handDrawModeEraserBtn = (ToggleButton) findViewById(R.id.handraw_conf_eraser_btn);
+		handDrawModeEraserBtn
+				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				PathFactory pathFactory=boardEntity.getPathFactory();
-				if (isChecked) {
-					oldPaintMode=pathFactory.getMode();
-					pathFactory.setPathMode(PathFactory.PATH_MODE_ERASER);
-				} else {
-					pathFactory.setPathMode(oldPaintMode);
-				}
-			}
-		});
-		
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						PathFactory pathFactory = boardEntity.getPathFactory();
+						if (isChecked) {
+							oldPaintMode = pathFactory.getMode();
+							pathFactory
+									.setPathMode(PathFactory.PATH_MODE_ERASER);
+						} else {
+							pathFactory.setPathMode(oldPaintMode);
+						}
+					}
+				});
+
 		// 便签模式设置
 		noteModeConfLayout = (LinearLayout) findViewById(R.id.note_conf_layout);
 		noteModeConfLayout.setOnClickListener(new OnClickListener() {
@@ -136,17 +150,17 @@ public class WhiteBoardActivity extends Activity {
 			public void onClick(View v) {
 			}
 		});
-		noteTextSizeBtn = (ToggleButton)findViewById(R.id.note_conf_textsize_btn);
-		noteStyleBtn = (ToggleButton)findViewById(R.id.note_conf_style_btn);
+		noteTextSizeBtn = (ToggleButton) findViewById(R.id.note_conf_textsize_btn);
+		noteStyleBtn = (ToggleButton) findViewById(R.id.note_conf_style_btn);
 		// 添加新便签按钮
-		noteAddNewBtn = (Button)findViewById(R.id.note_add_new);
+		noteAddNewBtn = (Button) findViewById(R.id.note_add_new);
 		noteAddNewBtn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				boardEntity.addEntity();
 			}
 		});
-		noteStyleConfGroup = (RadioGroup)findViewById(R.id.note_style_group);
+		noteStyleConfGroup = (RadioGroup) findViewById(R.id.note_style_group);
 		noteStyleConfGroup.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -166,48 +180,50 @@ public class WhiteBoardActivity extends Activity {
 		scaleTextView.setText((int) (boardEntity.getTotalScale() * 100) + "%");
 
 		// 模式选择监听器
-		modeSelectGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(RadioGroup group, int checkedId) {
-				switch (group.getCheckedRadioButtonId()) {
-				case R.id.mode_handdraw_btn:
-					// 手绘模式
-					handDrawModeConfLayout.setVisibility(View.VISIBLE);
-					noteModeConfLayout.setVisibility(View.GONE);
-					noteStyleConfGroup.setVisibility(View.GONE);
-					noteTextSizeConfLayout.setVisibility(View.GONE);
-					
-					// 修改模式
-					boardEntity.changeMode(BoardEntity.MODE_HANDDRAW);
-					break;
-				case R.id.mode_picdraw_btn:
-					// 图片模式
-					handDrawModeConfLayout.setVisibility(View.GONE);
-					noteModeConfLayout.setVisibility(View.GONE);
-					noteStyleConfGroup.setVisibility(View.GONE);
-					noteTextSizeConfLayout.setVisibility(View.GONE);
-					
-					// 修改模式
-					boardEntity.changeMode(BoardEntity.MODE_PIC);
-					break;
-				case R.id.mode_notedraw_btn:
-					// 便签模式
-					handDrawModeConfLayout.setVisibility(View.GONE);
-					noteModeConfLayout.setVisibility(View.VISIBLE);
-					noteStyleConfGroup.setVisibility(View.GONE);
-					noteTextSizeConfLayout.setVisibility(View.GONE);
-					noteStyleBtn.setChecked(false);
-					noteTextSizeBtn.setChecked(false);
-					
-					// 修改模式
-					boardEntity.changeMode(BoardEntity.MODE_NOTE);
-					break;
-				}
-			}
-		});
-		((RadioButton)modeSelectGroup.findViewById(R.id.mode_handdraw_btn)).setChecked(true);
-		
+		modeSelectGroup
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(RadioGroup group, int checkedId) {
+						switch (group.getCheckedRadioButtonId()) {
+						case R.id.mode_handdraw_btn:
+							// 手绘模式
+							handDrawModeConfLayout.setVisibility(View.VISIBLE);
+							noteModeConfLayout.setVisibility(View.GONE);
+							noteStyleConfGroup.setVisibility(View.GONE);
+							noteTextSizeConfLayout.setVisibility(View.GONE);
+
+							// 修改模式
+							boardEntity.changeMode(BoardEntity.MODE_HANDDRAW);
+							break;
+						case R.id.mode_picdraw_btn:
+							// 图片模式
+							handDrawModeConfLayout.setVisibility(View.GONE);
+							noteModeConfLayout.setVisibility(View.GONE);
+							noteStyleConfGroup.setVisibility(View.GONE);
+							noteTextSizeConfLayout.setVisibility(View.GONE);
+
+							// 修改模式
+							boardEntity.changeMode(BoardEntity.MODE_PIC);
+							break;
+						case R.id.mode_notedraw_btn:
+							// 便签模式
+							handDrawModeConfLayout.setVisibility(View.GONE);
+							noteModeConfLayout.setVisibility(View.VISIBLE);
+							noteStyleConfGroup.setVisibility(View.GONE);
+							noteTextSizeConfLayout.setVisibility(View.GONE);
+							noteStyleBtn.setChecked(false);
+							noteTextSizeBtn.setChecked(false);
+
+							// 修改模式
+							boardEntity.changeMode(BoardEntity.MODE_NOTE);
+							break;
+						}
+					}
+				});
+		((RadioButton) modeSelectGroup.findViewById(R.id.mode_handdraw_btn))
+				.setChecked(true);
+
 		// 便签字体设置按钮监听
 		noteTextSizeBtn
 				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -311,7 +327,7 @@ public class WhiteBoardActivity extends Activity {
 
 		// 触点数目
 		int pointerCount = event.getPointerCount();
-		
+
 		// 缩放比例
 		float scale = 1;
 		// 偏移距离
@@ -320,9 +336,9 @@ public class WhiteBoardActivity extends Activity {
 
 		// Log.d("DevLog", String.format("touch position: %f,%f", event.getX(),
 		// event.getY()));
-		
+
 		if (pointerCount == 1) {
-			
+
 			if (boardEntity.mode == BoardEntity.MODE_HANDDRAW) {
 				if (!isOnePointAction) {
 					switch (event.getAction()) {
@@ -333,7 +349,8 @@ public class WhiteBoardActivity extends Activity {
 					case MotionEvent.ACTION_MOVE:
 						float deltaX = event.getX() - firstTouchX;
 						float deltaY = event.getY() - firstTouchY;
-						int distSqua = (int)(deltaX * deltaX) + (int)(deltaY * deltaY);
+						int distSqua = (int) (deltaX * deltaX)
+								+ (int) (deltaY * deltaY);
 						if (distSqua > 40) {
 							isOnePointAction = true;
 							event.setAction(MotionEvent.ACTION_DOWN);
@@ -344,6 +361,7 @@ public class WhiteBoardActivity extends Activity {
 					return false;
 				}
 			} else if (boardEntity.mode == BoardEntity.MODE_PIC) {
+
 				if (!isOnePointAction) {
 					switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:
@@ -361,14 +379,13 @@ public class WhiteBoardActivity extends Activity {
 					return false;
 				}
 			}
-			
-			
+
 			boardEntity.onEntityTouchEvent(event);
 			if (event.getAction() == MotionEvent.ACTION_UP) {
 				isOnePointAction = false;
 			}
 		}
-		
+
 		if (!isOnePointAction && pointerCount == 2) {
 			switch (event.getActionMasked()) {
 			case MotionEvent.ACTION_MOVE:
@@ -408,7 +425,6 @@ public class WhiteBoardActivity extends Activity {
 				scaleTextView.setText((int) (boardEntity.getTotalScale() * 100)
 						+ "%");
 				boardView.postInvalidate();
-				
 
 				// Log.d("DevLog", String.format("Scale: %f\nDist: %f , %f",
 				// scale, dx, dy));
@@ -421,7 +437,7 @@ public class WhiteBoardActivity extends Activity {
 				oldMidPoint = getMidPoint(event);
 				break;
 			}
-		} 
+		}
 
 		return false;
 	}
@@ -429,22 +445,20 @@ public class WhiteBoardActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == RESULT_OK) {
-//			if (requestCode == SELECT_PICTURE) {
-//
-//				if (data != null) {
-//					Uri uri = data.getData();
-//					Log.e(TAG, uri.toString());
-//					Bitmap mBitmap = BitmapFactory.decodeFile(tmpPicFile
-//							.getAbsolutePath());
-//					boardEntity.receivePicture(mBitmap);
-//				} else {
-//					Log.e(TAG, "data == null");
-//				}
-//			}else{
+			if (requestCode == SELECT_CROP) {
+				Bundle extras = data.getExtras();
+
+				if (extras != null) {
+					boardEntity.receivePicture((Bitmap)extras.getParcelable("data"));
+				}
+
+			} else if (requestCode == SELECT_CAMER) {
+				doCrop();
+			} else {
 				Bitmap mBitmap = BitmapFactory.decodeFile(tmpPicFile
 						.getAbsolutePath());
 				boardEntity.receivePicture(mBitmap);
-//			}
+			}
 		} else {
 			Log.e(TAG, "result wrong");
 		}
@@ -467,11 +481,11 @@ public class WhiteBoardActivity extends Activity {
 							intent.addCategory(Intent.CATEGORY_OPENABLE);
 							intent.setType("image/*");
 							intent.putExtra("output", Uri.fromFile(tmpPicFile));
-							 intent.putExtra("crop", "true");
-							 intent.putExtra("aspectX", 1);// 裁剪框比例
-							 intent.putExtra("aspectY", 1);
-							 intent.putExtra("outputX", 400);// 输出图片大小
-							 intent.putExtra("outputY", 400);
+							intent.putExtra("crop", "true");
+							intent.putExtra("aspectX", 1);// 裁剪框比例
+							intent.putExtra("aspectY", 1);
+							intent.putExtra("outputX", int_Width_crop);// 输出图片大小
+							intent.putExtra("outputY", int_Height_crop);
 							startActivityForResult(
 									Intent.createChooser(intent, "选择图片"),
 									SELECT_PICTURE);
@@ -479,15 +493,44 @@ public class WhiteBoardActivity extends Activity {
 							Intent intent = new Intent(
 									MediaStore.ACTION_IMAGE_CAPTURE);
 							intent.putExtra("output", Uri.fromFile(tmpPicFile));
-//							 intent.putExtra("crop", "true");
-//							 intent.putExtra("aspectX", 1);// 裁剪框比例
-//							 intent.putExtra("aspectY", 1);
-//							 intent.putExtra("outputX", 180);// 输出图片大小
-//							 intent.putExtra("outputY", 180);
 							startActivityForResult(intent, SELECT_CAMER);
 						}
 					}
 				}).create().show();
 	}
 
+	private void doCrop() {
+		Intent intent = new Intent("com.android.camera.action.CROP");
+		intent.setType("image/*");
+
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
+				intent, 0);
+
+		int size = list.size();
+
+		if (size == 0) {
+			Toast.makeText(this, "Can not find image crop app",
+					Toast.LENGTH_SHORT).show();
+
+			return;
+		} else {
+			intent.setData(Uri.fromFile(this.tmpPicFile));
+
+
+			intent.putExtra("outputX", int_Height_crop);
+			intent.putExtra("outputY", int_Width_crop);
+			intent.putExtra("aspectX", 1);
+			intent.putExtra("aspectY", 1);
+			intent.putExtra("scale", true);
+			intent.putExtra("return-data", true);
+
+			Intent i = new Intent(intent);
+			ResolveInfo res = list.get(0);
+
+			i.setComponent(new ComponentName(res.activityInfo.packageName,
+					res.activityInfo.name));
+
+			startActivityForResult(i, SELECT_CROP);
+		}
+	}
 }
