@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -12,27 +13,64 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 public class PathFactory {
-	private static final float TOUCH_TOLERANCE =10f;
-	public static final int PATH_MODE_PAINT = 0x01;
-	public static final int PATH_MODE_ERASER = 0x02;
-	private static final String TAG = "PathFactory";
 
+	private static final String TAG = "PathFactory";
+	/**
+	 * 
+	 */
+	private static final float TOUCH_TOLERANCE = 10f;
+	/**
+	 * path 有各种模式我这叫类型,橡皮擦属于其中一种
+	 */
+	public static final int PATH_MODE_PAINT = 0x01f;
+	public static final int PATH_MODE_ERASER = 0x02f;
+
+	/**
+	 * 记录当前的path模式
+	 */
 	private int currentPathMode;
 
-	private List<Entity> entityList;
+	/**
+	 * 记录刚按下的位置
+	 */
 	private float sX;
 	private float sY;
+
 	private Paint mPaint;
 	private Path cPath;
+	private float paitnWidth;
+	private int paintColor;
 
-	private float paitn_width = 0;
 	private BoardEntity board;
-	private float px;
-	private float py;
+	private List<Entity> entityList;
 
+	/**
+	 * 记录画path时的每个点,以便存储恢复
+	 */
 	private ArrayList<PointF> pathPoints;
 
-	public void changePathMode(int mode) {
+	public PathFactory(BoardEntity b, List<Entity> list) {
+		this.entityList = list;
+		this.board = b;
+
+		paitnWidth = 10f;
+		cPath = new Path();
+		mPaint = new Paint();
+		mPaint.setStyle(Paint.Style.STROKE);
+		mPaint.setAntiAlias(true);
+		mPaint.setStrokeCap(Paint.Cap.ROUND);
+		mPaint.setStrokeJoin(Paint.Join.ROUND);
+		paintColor = Color.BLACK;
+
+		setPathMode(PATH_MODE_PAINT);
+	}
+
+	/**
+	 * 更改path的样式
+	 * 
+	 * @param mode
+	 */
+	public void setPathMode(int mode) {
 		this.currentPathMode = mode;
 		switch (mode) {
 		case PATH_MODE_PAINT:
@@ -42,23 +80,9 @@ public class PathFactory {
 		}
 	}
 
-	public PathFactory(BoardEntity b, List<Entity> list) {
-		this.entityList = list;
-		this.board = b;
-
-		paitn_width = 10f;
-		cPath = new Path();
-		mPaint = new Paint();
-		mPaint.setStyle(Paint.Style.STROKE);
-		mPaint.setAntiAlias(true);
-		mPaint.setStrokeCap(Paint.Cap.ROUND);
-		mPaint.setStrokeJoin(Paint.Join.ROUND);
-
-		changePathMode(PATH_MODE_PAINT);
-	}
-
 	public void draw(Canvas canvas) {
-		mPaint.setStrokeWidth((float) (paitn_width * board.getTotalScale()));
+		mPaint.setStrokeWidth((float) (paitnWidth * board.getTotalScale()));
+		mPaint.setColor(this.paintColor);
 		// 正在画但没画完的笔触
 		canvas.drawPath(cPath, mPaint);
 	}
@@ -70,8 +94,8 @@ public class PathFactory {
 		if (currentPathMode != PathFactory.PATH_MODE_ERASER) {
 			pathPoints.add(new PointF(x, y));
 		}
-		px = sX = x;
-		py = sY = y;
+		sX = x;
+		sY = y;
 	}
 
 	private void touch_move(float x, float y) {
@@ -96,6 +120,21 @@ public class PathFactory {
 			pathPoints.add(new PointF(sX, sY));
 			entityList
 					.add(new PathEntity(this.board, cPath, mPaint, pathPoints));
+		} else {
+			ArrayList<PointF> list = PathEntity.getPointsArray(cPath);
+			List<Entity> tmplist = new ArrayList<Entity>();
+			for (PointF p : list) {
+				for (Entity entity:entityList) {
+					if (entity.getType() == BoardEntity.TYPE_PATH_ENTITY) {
+						if (((PathEntity) entity).containPoint(p)) {
+							tmplist.add(entity);
+						}
+					}
+				}
+			}
+			for (Entity path:tmplist) {
+				entityList.remove(path);
+			}
 		}
 		// 重置cPath以便下一次重用
 		cPath.reset();
@@ -106,26 +145,7 @@ public class PathFactory {
 		float x = event.getX();
 		float y = event.getY();
 
-		// 如果是清楚笔触模式,则根据触点位置查找笔触,删掉它
-		if (currentPathMode == PATH_MODE_ERASER) {
-			List<Entity> tmplist = new ArrayList<Entity>();
-			for (Iterator<Entity> iterator = this.entityList.iterator(); iterator
-					.hasNext();) {
-				Entity entity = (Entity) iterator.next();
-				if (entity.getType() == BoardEntity.TYPE_PATH_ENTITY) {
-
-					if (((PathEntity) entity).containPoint(new PointF(x, y))) {
-						tmplist.add(entity);
-					}
-				}
-			}
-			for (Iterator<Entity> iterator = tmplist.iterator(); iterator
-					.hasNext();) {
-				PathEntity pathEntity = (PathEntity) iterator.next();
-				entityList.remove(pathEntity);
-			}
-		}
-
+	
 		// 判断action
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:// 刚按下

@@ -27,30 +27,50 @@ public class PictureEntity implements Entity {
 	private static String TAG = "BoardPicture";
 
 	private BoardEntity boardEntity;
-	double centerXonBoard, centerYonBoard;// 图片位置以中心位置代表，是在board上的位置
-	float scale;// 相对原图大小的缩放比例 newEdge/oldEdge
-	float rotate;// 旋转角度
-	float height, width;// 原图像宽高
-	private float swidth, sheight;// 原图像经board到屏幕缩放后的宽高
+	/**
+	 * 图片位置以中心位置代表，是在board上的位置
+	 */
+	double centerXonBoard, centerYonBoard;
+	/**
+	 * 相对原图大小的缩放比例 newEdge/oldEdge
+	 */
+	float scale;
+	/**
+	 * 旋转角度
+	 */
+	float rotate;
+	/**
+	 * 原图像宽高
+	 */
+	float height, width;
+	/**
+	 * 原图像经board到屏幕缩放后的宽高
+	 */
+	private float swidth, sheight;
 
-	private Matrix mMatrix;// 对图片进行矩阵变换
+	/**
+	 * 对图片进行矩阵变换
+	 */
+	private Matrix mMatrix;
 	private Matrix bMatrix;
 	private Bitmap mBitmap;
 
-	boolean isFocused;// 标志当前图片是否获取焦点
+	/*
+	 * 标志当前图片是否获取焦点
+	 */
+	boolean isFocused;
 
 	public Paint boxPaint; // 控制框的paint
 	private int touchWherre;// 记录触摸的位置
-	private float touchPointFSize = 30;
-	private float sTouchPointFSize = 30;
-	private float strokWidth = 5;
-	private float sStrokWidth = 5;
+	private float touchPointSize = 30;
+	private float strokeWidth = 5;
 	// 当前四个顶点位置 中心位置 顶部位置
 	private PointF sltp;
 	private PointF srtp;
 	private PointF srbp;
 	private PointF slbp;
 	private PointF stopp;
+	private PointF sbotp;
 	private PointF center;
 
 	// 触点当前位置和按下位置
@@ -70,14 +90,15 @@ public class PictureEntity implements Entity {
 	final static int a_right_bottom = 3;
 	final static int a_center = 4;
 	final static int a_rotate_handle = 5;
-	final static int a_out = 6;
+	final static int a_delete_handle = 6;
+	final static int a_out = 7;
 
 	public PictureEntity(BoardEntity board, Bitmap b, float x, float y) {
 		this.boardEntity = board;
 		this.mBitmap = b;
 
 		// 初始化
-		double tmpXY[]=board.screenToBoardCoodTrans(x, y);
+		double tmpXY[] = board.screenToBoardCoodTrans(x, y);
 		this.centerXonBoard = tmpXY[0];
 		this.centerYonBoard = tmpXY[1];
 		this.scale = 1;
@@ -88,7 +109,7 @@ public class PictureEntity implements Entity {
 
 		boxPaint = new Paint();
 		boxPaint.setStyle(Paint.Style.STROKE);
-		boxPaint.setStrokeWidth(strokWidth);
+		boxPaint.setStrokeWidth(strokeWidth);
 		boxPaint.setColor(Color.RED);
 		boxPaint.setStrokeJoin(Paint.Join.ROUND);
 		boxPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -121,11 +142,12 @@ public class PictureEntity implements Entity {
 		Paint p = new Paint();
 		p.setAntiAlias(true);
 		p.setColor(Color.RED);
-		c.drawCircle(sltp.x, sltp.y, sTouchPointFSize, p);
-		c.drawCircle(slbp.x, slbp.y, sTouchPointFSize, p);
-		c.drawCircle(srtp.x, srtp.y, sTouchPointFSize, p);
-		c.drawCircle(srbp.x, srbp.y, sTouchPointFSize, p);
-		c.drawCircle(stopp.x, stopp.y, sTouchPointFSize, p);
+		c.drawCircle(sltp.x, sltp.y, touchPointSize, p);
+		c.drawCircle(slbp.x, slbp.y, touchPointSize, p);
+		c.drawCircle(srtp.x, srtp.y, touchPointSize, p);
+		c.drawCircle(srbp.x, srbp.y, touchPointSize, p);
+		c.drawCircle(stopp.x, stopp.y, touchPointSize, p);
+		c.drawCircle(sbotp.x, sbotp.y, touchPointSize, p);
 		// 框
 		drawRect(sltp, srtp, srbp, slbp, c);
 
@@ -146,7 +168,7 @@ public class PictureEntity implements Entity {
 	 */
 	private void drawRect(PointF ltp, PointF rtp, PointF rbp, PointF lbp,
 			Canvas c) {
-		boxPaint.setStrokeWidth(sStrokWidth);
+		boxPaint.setStrokeWidth(strokeWidth);
 		c.drawLine(ltp.x, ltp.y, rtp.x, rtp.y, boxPaint);
 		c.drawLine(rtp.x, rtp.y, rbp.x, rbp.y, boxPaint);
 		c.drawLine(rbp.x, rbp.y, lbp.x, lbp.y, boxPaint);
@@ -163,8 +185,8 @@ public class PictureEntity implements Entity {
 	 * @param rotate
 	 * @return 旋转后的点
 	 */
-	private PointF rotatePointF(float centerX, float centerY, float x, float y,
-			float rotate) {
+	private PointF rotateByPointF(float centerX, float centerY, float x,
+			float y, float rotate) {
 		double angleHude = Math.toRadians(-rotate);/* 角度变成弧度 */
 		PointF tmp = new PointF();
 		tmp.x = (float) ((x - centerX) * Math.cos(angleHude) + (y - centerY)
@@ -197,20 +219,22 @@ public class PictureEntity implements Entity {
 		float y = this.center.y;
 
 		// 获取当前控制点的位置
-		float tmpx = width / 2 + sStrokWidth / 2;
-		float tmpy = height / 2 + sStrokWidth / 2;
+		float tmpx = width / 2 + strokeWidth / 2;
+		float tmpy = height / 2 + strokeWidth / 2;
 		sltp = new PointF(x - tmpx, y - tmpy);
 		srtp = new PointF(x + tmpx, y - tmpy);
 		srbp = new PointF(x + tmpx, y + tmpy);
 		slbp = new PointF(x - tmpx, y + tmpy);
 		stopp = new PointF(x, y - tmpy);
+		sbotp = new PointF(x, y + tmpy);
 
 		// 添加角度变换
-		sltp = rotatePointF(x, y, sltp.x, sltp.y, this.rotate);
-		srbp = rotatePointF(x, y, srbp.x, srbp.y, this.rotate);
-		slbp = rotatePointF(x, y, slbp.x, slbp.y, this.rotate);
-		srtp = rotatePointF(x, y, srtp.x, srtp.y, this.rotate);
-		stopp = rotatePointF(x, y, stopp.x, stopp.y, this.rotate);
+		sltp = rotateByPointF(x, y, sltp.x, sltp.y, this.rotate);
+		srbp = rotateByPointF(x, y, srbp.x, srbp.y, this.rotate);
+		slbp = rotateByPointF(x, y, slbp.x, slbp.y, this.rotate);
+		srtp = rotateByPointF(x, y, srtp.x, srtp.y, this.rotate);
+		stopp = rotateByPointF(x, y, stopp.x, stopp.y, this.rotate);
+		sbotp = rotateByPointF(x, y, sbotp.x, sbotp.y, this.rotate);
 
 		// 修正偏移
 		sltp.x += dx;
@@ -223,9 +247,10 @@ public class PictureEntity implements Entity {
 		srtp.y += dy;
 		stopp.x += dx;
 		stopp.y += dy;
+		sbotp.x += dx;
+		sbotp.y += dy;
 		center.x += dx;
 		center.y += dy;
-
 
 	}
 
@@ -236,11 +261,6 @@ public class PictureEntity implements Entity {
 		// 转为屏幕上宽高
 		swidth = boardEntity.boardToScreenSizeTrans(this.width);
 		sheight = boardEntity.boardToScreenSizeTrans(this.height);
-
-		// 操作框边的宽度，控制点的大小
-		sStrokWidth = boardEntity.boardToScreenSizeTrans(this.strokWidth);
-		sTouchPointFSize = boardEntity
-				.boardToScreenSizeTrans(this.touchPointFSize);
 
 		// 对图片随board进行缩放
 		bMatrix = new Matrix();
@@ -329,8 +349,8 @@ public class PictureEntity implements Entity {
 	 * @return
 	 */
 	private boolean containPointF(PointF p, float x, float y) {
-		if (x > p.x - touchPointFSize && x < p.x + touchPointFSize
-				&& y > p.y - touchPointFSize && y < p.y + touchPointFSize) {
+		if (x > p.x - touchPointSize && x < p.x + touchPointSize
+				&& y > p.y - touchPointSize && y < p.y + touchPointSize) {
 			return true;
 		}
 		return false;
@@ -374,7 +394,7 @@ public class PictureEntity implements Entity {
 			case a_right_top:
 			case a_left_bottom:
 			case a_right_bottom:
-				computeScale(x, y,touchWherre);
+				computeScale(x, y, touchWherre);
 				break;
 			case a_rotate_handle:
 
@@ -400,17 +420,20 @@ public class PictureEntity implements Entity {
 				this.rotate += dAngle * sign;
 
 				break;
+			case a_delete_handle:
+				boardEntity.delEntity(this);
+				break;
 			}
 		}
 	}
 
-	private void computeScale(float x, float y,int vertex) {
-		float ddx = 0,ddy = 0;
-		
+	private void computeScale(float x, float y, int vertex) {
+		float ddx = 0, ddy = 0;
+
 		switch (vertex) {
 		case PictureEntity.a_right_bottom:
 			ddx = x - this.sltp.x;
-			ddy = y -this.sltp.y;
+			ddy = y - this.sltp.y;
 			break;
 		case PictureEntity.a_right_top:
 			ddx = x - this.slbp.x;
@@ -429,30 +452,36 @@ public class PictureEntity implements Entity {
 		float d1 = (float) Math.sqrt(Math.pow(ddx, 2) + Math.pow(ddy, 2));
 		float d2 = (float) Math.sqrt(Math.pow(this.swidth, 2)
 				+ Math.pow(this.sheight, 2));
-		float tmp=scale;
-		scale = d1/ d2;
-		Log.e(TAG,"scale="+scale);
-		
+		float tmp = scale;
+		scale = d1 / d2;
+		Log.e(TAG, "scale=" + scale);
+
 		// 中心偏移的距离
-		double dl = (float) Math.sqrt(Math.pow(
-				(this.scale * this.swidth - this.swidth*tmp) / 2, 2)
-				+ Math.pow((this.scale * this.sheight - this.sheight*tmp) / 2, 2));
-		//中点与左上角连线与ｘ轴正向的夹角角度
-		double wangle ;
-		if (vertex==PictureEntity.a_left_top||vertex==PictureEntity.a_right_bottom) {
+		double dl = (float) Math
+				.sqrt(Math.pow(
+						(this.scale * this.swidth - this.swidth * tmp) / 2, 2)
+						+ Math.pow((this.scale * this.sheight - this.sheight
+								* tmp) / 2, 2));
+		// 中点与左上角连线与ｘ轴正向的夹角角度
+		double wangle;
+		if (vertex == PictureEntity.a_left_top
+				|| vertex == PictureEntity.a_right_bottom) {
 			wangle = -Math.toRadians(this.rotate)
-					+ (Math.atan(this.width / this.height)) + Math.toRadians(90);
-		}else{
+					+ (Math.atan(this.width / this.height))
+					+ Math.toRadians(90);
+		} else {
 			wangle = -Math.toRadians(this.rotate)
-					- (Math.atan(this.width / this.height)) + Math.toRadians(90);
+					- (Math.atan(this.width / this.height))
+					+ Math.toRadians(90);
 		}
-		float sign=scale>tmp?1:-1;
-		if (vertex==PictureEntity.a_left_top||vertex==PictureEntity.a_right_top) {
-			dx += (float) (Math.cos(wangle) * dl)*sign;
-			dy += -(float) (Math.sin(wangle) * dl)*sign;
-		}else{
-			dx += -(float) (Math.cos(wangle) * dl)*sign;
-			dy += (float) (Math.sin(wangle) * dl)*sign;
+		float sign = scale > tmp ? 1 : -1;
+		if (vertex == PictureEntity.a_left_top
+				|| vertex == PictureEntity.a_right_top) {
+			dx += (float) (Math.cos(wangle) * dl) * sign;
+			dy += -(float) (Math.sin(wangle) * dl) * sign;
+		} else {
+			dx += -(float) (Math.cos(wangle) * dl) * sign;
+			dy += (float) (Math.sin(wangle) * dl) * sign;
 		}
 	}
 
@@ -475,7 +504,9 @@ public class PictureEntity implements Entity {
 			return a_right_bottom;
 		} else if (containPointF(stopp, x, y)) {
 			return a_rotate_handle;
-		} else if (containPointFInRect(x, y)) {
+		} else if (containPointF(sbotp, x, y)) {
+			return a_delete_handle;
+		}  else if (containPointFInRect(x, y)) {
 			return a_center;
 		} else {
 			return a_out;
@@ -492,10 +523,17 @@ public class PictureEntity implements Entity {
 
 	}
 
+	/**
+	 * 判断点是否在控制点区域
+	 * 
+	 * @param cx
+	 * @param cy
+	 * @return
+	 */
 	public boolean containPointFInContronPointF(float cx, float cy) {
 		if (containPointF(sltp, cx, cy) || containPointF(srtp, cx, cy)
 				|| containPointF(slbp, cx, cy) || containPointF(srbp, cx, cy)
-				|| containPointF(stopp, cx, cy)) {
+				|| containPointF(stopp, cx, cy)||containPointF(sbotp, cx, cy)) {
 			return true;
 		}
 		return false;
@@ -509,12 +547,10 @@ public class PictureEntity implements Entity {
 		switch (event.getAction()) {
 
 		case MotionEvent.ACTION_DOWN:
-			
 			onTouchDown(cx, cy);
 			sx = cx;
 			sy = cy;
 			boardEntity.invalidateView();
-
 			break;
 		case MotionEvent.ACTION_MOVE:
 			if (Math.abs(cx - sx) > 5 || Math.abs(cy - sy) > 5) {
@@ -535,17 +571,18 @@ public class PictureEntity implements Entity {
 	@Override
 	public boolean isInRange(float x, float y) {
 		if (isFocused) {
-			return containPointFInRect(x, y)||containPointFInContronPointF(x, y);
-		}else{
+			return containPointFInRect(x, y)
+					|| containPointFInContronPointF(x, y);
+		} else {
 			return containPointFInRect(x, y);
 		}
 	}
 
 	@Override
 	public void removeFocus() {
-		this.isFocused=false;
+		this.isFocused = false;
 		// 请求重绘
-				boardEntity.invalidateView();
+		boardEntity.invalidateView();
 	}
 	
 	@Override
