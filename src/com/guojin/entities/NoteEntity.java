@@ -1,5 +1,6 @@
 package com.guojin.entities;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -10,10 +11,16 @@ import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.guojin.store.DatabaseContract.NoteDBEntity;
 import com.guojin.text.DynamicTextLayout;
 import com.guojin.text.DynamicTextLayout.TextOutSizeListener;
 
 public class NoteEntity implements Entity {
+	
+	// 存储ID
+	public long store_id = -1;
+	public long getID() { return store_id; }
+	public void setID(long id) { store_id = id; }
 	
 	// 实体类型
 	private int type = BoardEntity.TYPE_NOTE_ENTITY;
@@ -151,6 +158,12 @@ public class NoteEntity implements Entity {
 	public void setStyleColor(int color) {
 		bgColor = color;
 		bgPaint.setColor(bgColor);
+	}
+	
+	@Override
+	public ContentValues getContentValues() {
+		ContentValues values = new ContentValues();
+		return null;
 	}
 	
 	@Override

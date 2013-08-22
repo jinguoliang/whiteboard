@@ -1,5 +1,6 @@
 package com.guojin.entities;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +18,12 @@ import android.view.MotionEvent;
  */
 public class PictureEntity implements Entity {
 
+	@Override
+	public long getID() { return -1; }
+	
+	@Override
+	public void setID(long id) {  }
+	
 	private static String TAG = "BoardPicture";
 
 	private BoardEntity boardEntity;
@@ -539,5 +546,11 @@ public class PictureEntity implements Entity {
 		this.isFocused=false;
 		// 请求重绘
 				boardEntity.invalidateView();
+	}
+	
+	@Override
+	public ContentValues getContentValues() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

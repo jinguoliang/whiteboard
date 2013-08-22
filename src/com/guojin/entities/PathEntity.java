@@ -2,6 +2,7 @@ package com.guojin.entities;
 
 import java.util.ArrayList;
 
+import android.content.ContentValues;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -14,6 +15,13 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 public class PathEntity implements Entity {
+	
+	@Override
+	public long getID() { return -1; }
+	
+	@Override
+	public void setID(long id) {  }
+	
 	private static final String TAG = "PathEntity";
 
 	BoardEntity board;
@@ -149,5 +157,9 @@ public class PathEntity implements Entity {
 		return (float) Math.sqrt(Math.pow(p1.x-p2.x, 2)+Math.pow(p1.y-p2.y, 2));
 	}
 	
-	
+	@Override
+	public ContentValues getContentValues() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

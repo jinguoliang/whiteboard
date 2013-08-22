@@ -1,5 +1,6 @@
 package com.guojin.entities;
 
+import android.content.ContentValues;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,11 +13,17 @@ import android.view.MotionEvent;
  *
  */
 public class PaperEntity implements Entity {
-
+	
 	@Override
 	public int getType() {
 		return 0;
 	}
+	
+	@Override
+	public long getID() { return -1; }
+	
+	@Override
+	public void setID(long id) {  }
 	
 	/**
 	 * 格子纸
@@ -251,5 +258,11 @@ public class PaperEntity implements Entity {
 	@Override
 	public void removeFocus() {
 		// 空实现
+	}
+	
+	@Override
+	public ContentValues getContentValues() {
+		// 空实现
+		return null;
 	}
 }
