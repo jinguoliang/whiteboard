@@ -59,7 +59,13 @@ public class DataManager {
 						NoteDBEntity._ID + "=?", new String[] {"" + id});
 			}
 		} else if (entity instanceof PictureEntity) {
-			
+			if (id == -1) {
+				id = db.insertOrThrow(PicDBEntity.TABLE_NAME, null, entity.getContentValues());
+				entity.setID(id);
+			} else {
+				db.update(PicDBEntity.TABLE_NAME, entity.getContentValues(),
+						NoteDBEntity._ID + "=?", new String[] {"" + id});
+			}
 		}
 		
 	}

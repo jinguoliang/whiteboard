@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 
 import com.guojin.store.DataManager;
 import com.guojin.store.DatabaseContract.NoteDBEntity;
+import com.guojin.store.DatabaseContract.PicDBEntity;
 import com.guojin.whiteboard.BoardView;
 import com.guojin.whiteboard.R;
 import com.guojin.whiteboard.WhiteBoardActivity;
@@ -22,7 +23,7 @@ import com.guojin.whiteboard.WhiteBoardActivity;
 public class BoardEntity {
 
 	private int boardID = 1;
-	
+
 	// 模式常量
 	public static final int MODE_HANDDRAW = 0x11;
 	public static final int MODE_PIC = 0x12;
@@ -84,6 +85,7 @@ public class BoardEntity {
 	private DataManager dataManager;
 	// 显示顺序索引的最大值
 	private int maxShowIndex = 0;
+
 	/**
 	 * 构造函数
 	 */
@@ -91,7 +93,7 @@ public class BoardEntity {
 
 		context = c;
 		dataManager = new DataManager(c);
-		
+
 		// 初始化画笔
 		coverPaint.setAntiAlias(true);
 		coverPaint.setColor(Color.argb(150, 200, 200, 200));
@@ -111,39 +113,70 @@ public class BoardEntity {
 		Cursor noteCursor = cursors[0];
 		Cursor picCursor = cursors[1];
 		Cursor pathCursor = cursors[2];
-		
+
+		// 加载note
 		LinkedList<Entity> eList = new LinkedList<Entity>();
 		if (noteCursor != null && noteCursor.moveToFirst()) {
-			for (noteCursor.moveToFirst(); !noteCursor.isAfterLast(); noteCursor.moveToNext()) {
-				long id = noteCursor.getLong(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity._ID));
-				int showIndex = noteCursor.getInt(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.SHOW_INDEX));
-				double posX = noteCursor.getDouble(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.POS_X));
-				double posY = noteCursor.getDouble(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.POS_Y));
-				double width = noteCursor.getDouble(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.WIDTH));
-				double height = noteCursor.getDouble(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.HEIGHT));
-				String text = noteCursor.getString(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.TEXT));
-				int bgColor = noteCursor.getInt(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.BG_COLOR));
-				int textColor = noteCursor.getInt(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.TEXT_COLOR));
-				float textSize = noteCursor.getFloat(
-						noteCursor.getColumnIndexOrThrow(NoteDBEntity.TEXT_SIZE));
-				eList.add(new NoteEntity(this, context, id, boardID, showIndex, posX, posY, width, height, 
-						text, bgColor, textColor, textSize));
+			for (noteCursor.moveToFirst(); !noteCursor.isAfterLast(); noteCursor
+					.moveToNext()) {
+				long id = noteCursor.getLong(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity._ID));
+				int showIndex = noteCursor.getInt(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.SHOW_INDEX));
+				double posX = noteCursor.getDouble(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.POS_X));
+				double posY = noteCursor.getDouble(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.POS_Y));
+				double width = noteCursor.getDouble(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.WIDTH));
+				double height = noteCursor.getDouble(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.HEIGHT));
+				String text = noteCursor.getString(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.TEXT));
+				int bgColor = noteCursor.getInt(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.BG_COLOR));
+				int textColor = noteCursor.getInt(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.TEXT_COLOR));
+				float textSize = noteCursor.getFloat(noteCursor
+						.getColumnIndexOrThrow(NoteDBEntity.TEXT_SIZE));
+				eList.add(new NoteEntity(this, context, id, boardID, showIndex,
+						posX, posY, width, height, text, bgColor, textColor,
+						textSize));
 			}
 		}
-		
+		// 加载图片
+		if (picCursor != null && picCursor.moveToFirst()) {
+			for (picCursor.moveToFirst(); !picCursor.isAfterLast(); picCursor
+					.moveToNext()) {
+				long id = picCursor.getLong(picCursor
+						.getColumnIndexOrThrow(PicDBEntity._ID));
+				int showIndex = picCursor.getInt(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.SHOW_INDEX));
+				double posX = picCursor.getDouble(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.POS_X));
+				double posY = picCursor.getDouble(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.POS_Y));
+				double width = picCursor.getDouble(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.WIDTH));
+				double height = picCursor.getDouble(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.HEIGHT));
+				float scale = picCursor.getFloat(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.SCALE));
+				float rotate = picCursor.getFloat(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.ROTATE));
+				String src = picCursor.getString(picCursor
+						.getColumnIndexOrThrow(PicDBEntity.SRC));
+
+				eList.add(new PictureEntity(this, id, showIndex, src,
+						posX, posY, rotate, scale));
+			}
+		}
+		// 加载笔触
+
 		noteCursor.close();
 		picCursor.close();
 		pathCursor.close();
-		
+
 		Collections.sort(eList);
 		entityList.addAll(eList);
 		if (!entityList.isEmpty()) {
@@ -227,6 +260,7 @@ public class BoardEntity {
 
 	/**
 	 * 更改模式
+	 * 
 	 * @param mode
 	 */
 	public void changeMode(int mode) {
@@ -239,33 +273,35 @@ public class BoardEntity {
 			}
 		}
 	}
-	
+
 	/**
 	 * 添加实体
+	 * 
 	 * @param mode
 	 */
 	public void addEntity() {
 		switch (mode) {
 		case MODE_NOTE:
-			Entity noteEntity = new NoteEntity(this, context, -1, boardID, ++maxShowIndex,
-					totalOffsetX + 100, totalOffsetY + 100, 200, 300,
-					"", context.getResources().getColor(R.color.note_style_blue),
-					Color.BLACK, 20);
+			Entity noteEntity = new NoteEntity(this, context, -1, boardID,
+					++maxShowIndex, totalOffsetX + 100, totalOffsetY + 100,
+					200, 300, "", context.getResources().getColor(
+							R.color.note_style_blue), Color.BLACK, 20);
 			dataManager.saveData(noteEntity);
 			entityList.add(noteEntity);
 			break;
 		}
 		invalidateView();
 	}
-	
+
 	/**
 	 * 保存实体
+	 * 
 	 * @param entity
 	 */
 	public void saveEntity(Entity entity) {
 		dataManager.saveData(entity);
 	}
-	
+
 	/**
 	 * 屏幕触摸方法
 	 * 
@@ -298,27 +334,30 @@ public class BoardEntity {
 					// 便利查找获取焦点的实体
 					for (int i = entityList.size() - 1; i >= 0; i--) {
 						Entity e = entityList.get(i);
-						if (mode == MODE_NOTE && e.getType() == TYPE_NOTE_ENTITY
-								|| mode == MODE_PIC && e.getType() == TYPE_PIC_ENTITY) {
-							if (!isCapture && e.isInRange(event.getX(), event.getY())) {
+						if (mode == MODE_NOTE
+								&& e.getType() == TYPE_NOTE_ENTITY
+								|| mode == MODE_PIC
+								&& e.getType() == TYPE_PIC_ENTITY) {
+							if (!isCapture
+									&& e.isInRange(event.getX(), event.getY())) {
 								isCapture = true;
 								originEntityIndex = i;
 								entityList.remove(i);
-								
+
 								e.onEntityTouchEvent(event);
 								focusedEntity = e;
 								break;
 							}
 						}
-						
+
 					}
 
 					// 如果点击位置不再任何entity上则要添加新的entity
 					if (focusedEntity == null) {
 						switch (this.mode) {
 						case BoardEntity.MODE_PIC:
-							this.picInsertX=event.getX();
-							this.picInsertY=event.getY();
+							this.picInsertX = event.getX();
+							this.picInsertY = event.getY();
 							((WhiteBoardActivity) (context)).loadPicture();
 							break;
 						case BoardEntity.MODE_NOTE:
@@ -530,17 +569,28 @@ public class BoardEntity {
 		// Log.d("DevLog", String.format("(%f,%f,%f,%f)", drawRangeLeft,
 		// drawRangeTop, drawRangeRight, drawRangeBottom));
 	}
-	
+
 	/**
 	 * 与WhiteBoardActivity的loadPicture配对使用，当它获取到图片后会调用该函数将其传入进来
+	 * 
 	 * @param b
 	 */
-	public void receivePicture(Bitmap b) {
-		entityList.add(new PictureEntity(this,b ,picInsertX, picInsertY));
+	public void receivePicture(String fileName) {
+		Entity entity = new PictureEntity(this, fileName, picInsertX, picInsertY);
+		entityList.add(entity);
 		invalidateView();
+		dataManager.saveData(entity);
 	}
 
 	public PathFactory getPathFactory() {
 		return this.pathFactory;
+	}
+
+	public int getBoardID() {
+		return boardID;
+	}
+	
+	public DataManager getDataManager() {
+		return dataManager;
 	}
 }

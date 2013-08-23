@@ -1,6 +1,7 @@
 package com.guojin.whiteboard;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcel;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -38,6 +40,7 @@ import android.widget.ToggleButton;
 
 import com.guojin.entities.BoardEntity;
 import com.guojin.entities.PathFactory;
+import com.guojin.store.FileStore;
 
 public class WhiteBoardActivity extends Activity {
 
@@ -46,7 +49,7 @@ public class WhiteBoardActivity extends Activity {
 	private static final int SELECT_PICTURE = 0;
 	private static final int SELECT_CAMER = 1;
 	private static final int SELECT_CROP = 2;
-	//裁剪宽高
+	// 裁剪宽高
 	int int_Height_crop = 250;
 	int int_Width_crop = 250;
 
@@ -121,7 +124,6 @@ public class WhiteBoardActivity extends Activity {
 		handDrawModeEraserBtn = (ToggleButton) findViewById(R.id.handraw_conf_eraser_btn);
 		handDrawModeEraserBtn
 				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
 
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView,
@@ -443,15 +445,20 @@ public class WhiteBoardActivity extends Activity {
 				Bundle extras = data.getExtras();
 
 				if (extras != null) {
-					boardEntity.receivePicture((Bitmap)extras.getParcelable("data"));
+					try {
+						String fileName = FileStore.storeFile((Bitmap) extras
+								.getParcelable("data"));
+						boardEntity.receivePicture(fileName);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 
 			} else if (requestCode == SELECT_CAMER) {
 				doCrop();
 			} else {
-				Bitmap mBitmap = BitmapFactory.decodeFile(tmpPicFile
-						.getAbsolutePath());
-				boardEntity.receivePicture(mBitmap);
+				boardEntity.receivePicture(tmpPicFile.getAbsolutePath());
 			}
 		} else {
 			Log.e(TAG, "result wrong");
@@ -463,9 +470,7 @@ public class WhiteBoardActivity extends Activity {
 		new AlertDialog.Builder(this).setTitle("选择图片来源")
 				.setItems(items, new AlertDialog.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
-						tmpPicFile = new File(Environment
-								.getExternalStorageDirectory().getPath()
-								+ "/tmppic"
+						tmpPicFile = new File(FileStore.picDir
 								+ SystemClock.currentThreadTimeMillis()
 								+ ".jpg");
 
@@ -509,7 +514,6 @@ public class WhiteBoardActivity extends Activity {
 			return;
 		} else {
 			intent.setData(Uri.fromFile(this.tmpPicFile));
-
 
 			intent.putExtra("outputX", int_Height_crop);
 			intent.putExtra("outputY", int_Width_crop);

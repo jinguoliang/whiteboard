@@ -1,5 +1,8 @@
 package com.guojin.entities;
 
+import com.guojin.store.DatabaseContract.NoteDBEntity;
+import com.guojin.store.DatabaseContract.PicDBEntity;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,12 +21,18 @@ import android.view.MotionEvent;
  */
 public class PictureEntity extends Entity {
 
+	public long store_id = -1;
+
 	@Override
-	public long getID() { return -1; }
-	
+	public long getID() {
+		return store_id;
+	}
+
 	@Override
-	public void setID(long id) {  }
-	
+	public void setID(long id) {
+		store_id = id;
+	}
+
 	private static String TAG = "BoardPicture";
 
 	private BoardEntity boardEntity;
@@ -83,6 +92,8 @@ public class PictureEntity extends Entity {
 	private float dx = 0;
 	private float dy = 0;
 
+	private String imageSrc;
+
 	// 触摸位置标记
 	final static int a_left_top = 0;
 	final static int a_right_top = 1;
@@ -106,6 +117,40 @@ public class PictureEntity extends Entity {
 		this.isFocused = false;
 		this.height = b.getHeight();
 		this.width = b.getWidth();
+
+		boxPaint = new Paint();
+		boxPaint.setStyle(Paint.Style.STROKE);
+		boxPaint.setStrokeWidth(strokeWidth);
+		boxPaint.setColor(Color.RED);
+		boxPaint.setStrokeJoin(Paint.Join.ROUND);
+		boxPaint.setStrokeCap(Paint.Cap.ROUND);
+		boxPaint.setAntiAlias(true);
+
+		mMatrix = new Matrix();
+	}
+
+	public PictureEntity(BoardEntity board, String imageSrc, float x, float y) {
+		this(board, BitmapFactory.decodeFile(imageSrc), x, y);
+		this.imageSrc=imageSrc;
+	}
+
+	public PictureEntity(BoardEntity board, long id, int showIndex, String imageSrc,
+			double x, double y, float rotate, float scale) {
+		this.boardEntity = board;
+		this.imageSrc=imageSrc;
+		Log.d(TAG,"file:"+imageSrc);
+		this.mBitmap =BitmapFactory.decodeFile(imageSrc);
+
+		// 初始化
+		setID(id);
+		this.showIndex = showIndex;
+		this.centerXonBoard = x;
+		this.centerYonBoard = y;
+		this.scale = scale;
+		this.rotate = rotate;
+		this.isFocused = true;
+		this.height = this.mBitmap.getHeight();
+		this.width =  this.mBitmap.getWidth();
 
 		boxPaint = new Paint();
 		boxPaint.setStyle(Paint.Style.STROKE);
@@ -272,7 +317,9 @@ public class PictureEntity extends Entity {
 		Paint p = new Paint();
 		p.setAntiAlias(true);
 		transformBitmapMatrix();
-		c.drawBitmap(mBitmap, mMatrix, p);
+		if (mBitmap != null) {
+			c.drawBitmap(mBitmap, mMatrix, p);
+		}
 	}
 
 	private void transformBitmapMatrix() {
@@ -506,7 +553,7 @@ public class PictureEntity extends Entity {
 			return a_rotate_handle;
 		} else if (containPointF(sbotp, x, y)) {
 			return a_delete_handle;
-		}  else if (containPointFInRect(x, y)) {
+		} else if (containPointFInRect(x, y)) {
 			return a_center;
 		} else {
 			return a_out;
@@ -533,7 +580,7 @@ public class PictureEntity extends Entity {
 	public boolean containPointFInContronPointF(float cx, float cy) {
 		if (containPointF(sltp, cx, cy) || containPointF(srtp, cx, cy)
 				|| containPointF(slbp, cx, cy) || containPointF(srbp, cx, cy)
-				|| containPointF(stopp, cx, cy)||containPointF(sbotp, cx, cy)) {
+				|| containPointF(stopp, cx, cy) || containPointF(sbotp, cx, cy)) {
 			return true;
 		}
 		return false;
@@ -560,6 +607,9 @@ public class PictureEntity extends Entity {
 				boardEntity.invalidateView();
 			}
 			break;
+		case MotionEvent.ACTION_UP:
+			boardEntity.getDataManager().saveData(this);
+			break;
 		}
 	}
 
@@ -584,10 +634,19 @@ public class PictureEntity extends Entity {
 		// 请求重绘
 		boardEntity.invalidateView();
 	}
-	
+
 	@Override
 	public ContentValues getContentValues() {
-		// TODO Auto-generated method stub
-		return null;
+		ContentValues values = new ContentValues();
+		values.put(PicDBEntity.BOARD_ID, boardEntity.getBoardID());
+		values.put(PicDBEntity.SHOW_INDEX, showIndex + "");
+		values.put(PicDBEntity.POS_X, this.centerXonBoard);
+		values.put(PicDBEntity.POS_Y, this.centerYonBoard);
+		values.put(PicDBEntity.WIDTH, this.width);
+		values.put(PicDBEntity.HEIGHT, this.height);
+		values.put(PicDBEntity.SCALE, this.scale);
+		values.put(PicDBEntity.ROTATE, this.rotate);
+		values.put(PicDBEntity.SRC,this.imageSrc);
+		return values;
 	}
 }
