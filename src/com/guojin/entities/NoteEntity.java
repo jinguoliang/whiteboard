@@ -2,20 +2,18 @@ package com.guojin.entities;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.guojin.store.DatabaseContract.NoteDBEntity;
 import com.guojin.text.DynamicTextLayout;
 import com.guojin.text.DynamicTextLayout.TextOutSizeListener;
 
-public class NoteEntity implements Entity {
+public class NoteEntity extends Entity {
 	
 	// 存储ID
 	public long store_id = -1;
@@ -89,13 +87,31 @@ public class NoteEntity implements Entity {
 	private Context context;
 	private DynamicTextLayout textLayout;
 	
+	private String text;
+	private int textColor;
+	
+	private int boardID;
+	
 	// 文本字间距
 	private double textSpan = 1;
 	
-	public NoteEntity(BoardEntity be, Context c) {
+	public NoteEntity(BoardEntity be, Context c, long id, int boardID, int showIndex, 
+			double posX, double posY, double width, double height, 
+			String text, int bgColor, int textColor, float textSize) {
 		
 		boardEntity = be;
 		context = c;
+		this.store_id = id;
+		this.boardID = boardID;
+		this.showIndex = showIndex;
+		this.boardX = posX;
+		this.boardY = posY;
+		this.noteWidth = width;
+		this.noteHeight = height;
+		this.bgColor = bgColor;
+		this.boardTextSize = textSize;
+		this.text = text;
+		this.textColor = textColor;
 		
 		// 初始化背景画笔
 		bgPaint = new Paint();
@@ -163,7 +179,17 @@ public class NoteEntity implements Entity {
 	@Override
 	public ContentValues getContentValues() {
 		ContentValues values = new ContentValues();
-		return null;
+		values.put(NoteDBEntity.BOARD_ID, boardID);
+		values.put(NoteDBEntity.SHOW_INDEX, showIndex + "");
+		values.put(NoteDBEntity.POS_X, boardX);
+		values.put(NoteDBEntity.POS_Y, boardY);
+		values.put(NoteDBEntity.WIDTH, noteWidth);
+		values.put(NoteDBEntity.HEIGHT, noteHeight);
+		values.put(NoteDBEntity.TEXT, text);
+		values.put(NoteDBEntity.BG_COLOR, bgColor);
+		values.put(NoteDBEntity.TEXT_COLOR, textColor);
+		values.put(NoteDBEntity.TEXT_SIZE, boardTextSize);
+		return values;
 	}
 	
 	@Override
@@ -362,6 +388,9 @@ public class NoteEntity implements Entity {
 			break;
 			
 		case MotionEvent.ACTION_UP:
+			if (isMoveable || isResizeable) {
+				boardEntity.saveEntity(this);
+			}
 			isMoveable = false;
 			isResizeable = false;
 			break;
@@ -430,7 +459,6 @@ public class NoteEntity implements Entity {
 					oldX = event.getX();
 					oldY = event.getY();
 					boardEntity.invalidateView();
-					
 				}
 			}
 			

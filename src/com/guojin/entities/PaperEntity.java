@@ -12,7 +12,7 @@ import android.view.MotionEvent;
  * @author donie
  *
  */
-public class PaperEntity implements Entity {
+public class PaperEntity extends Entity {
 	
 	@Override
 	public int getType() {

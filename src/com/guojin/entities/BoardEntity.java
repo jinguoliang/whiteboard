@@ -1,22 +1,28 @@
 package com.guojin.entities;
 
+import java.util.Collections;
 import java.util.LinkedList;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.util.Log;
 import android.view.MotionEvent;
 
+import com.guojin.store.DataManager;
+import com.guojin.store.DatabaseContract.NoteDBEntity;
 import com.guojin.whiteboard.BoardView;
+import com.guojin.whiteboard.R;
 import com.guojin.whiteboard.WhiteBoardActivity;
 
 public class BoardEntity {
 
+	private int boardID = 1;
+	
 	// 模式常量
 	public static final int MODE_HANDDRAW = 0x11;
 	public static final int MODE_PIC = 0x12;
@@ -74,13 +80,18 @@ public class BoardEntity {
 	private float picInsertX;
 	private float picInsertY;
 
+	// 数据操作
+	private DataManager dataManager;
+	// 显示顺序索引的最大值
+	private int maxShowIndex = 0;
 	/**
 	 * 构造函数
 	 */
 	public BoardEntity(Context c) {
 
 		context = c;
-
+		dataManager = new DataManager(c);
+		
 		// 初始化画笔
 		coverPaint.setAntiAlias(true);
 		coverPaint.setColor(Color.argb(150, 200, 200, 200));
@@ -96,8 +107,48 @@ public class BoardEntity {
 	 * 加载实体
 	 */
 	private void loadEntity() {
-		entityList.add(new NoteEntity(this, context));
-
+		Cursor[] cursors = dataManager.getAllCursor(boardID);
+		Cursor noteCursor = cursors[0];
+		Cursor picCursor = cursors[1];
+		Cursor pathCursor = cursors[2];
+		
+		LinkedList<Entity> eList = new LinkedList<Entity>();
+		if (noteCursor != null && noteCursor.moveToFirst()) {
+			for (noteCursor.moveToFirst(); !noteCursor.isAfterLast(); noteCursor.moveToNext()) {
+				long id = noteCursor.getLong(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity._ID));
+				int showIndex = noteCursor.getInt(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.SHOW_INDEX));
+				double posX = noteCursor.getDouble(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.POS_X));
+				double posY = noteCursor.getDouble(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.POS_Y));
+				double width = noteCursor.getDouble(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.WIDTH));
+				double height = noteCursor.getDouble(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.HEIGHT));
+				String text = noteCursor.getString(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.TEXT));
+				int bgColor = noteCursor.getInt(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.BG_COLOR));
+				int textColor = noteCursor.getInt(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.TEXT_COLOR));
+				float textSize = noteCursor.getFloat(
+						noteCursor.getColumnIndexOrThrow(NoteDBEntity.TEXT_SIZE));
+				eList.add(new NoteEntity(this, context, id, boardID, showIndex, posX, posY, width, height, 
+						text, bgColor, textColor, textSize));
+			}
+		}
+		
+		noteCursor.close();
+		picCursor.close();
+		pathCursor.close();
+		
+		Collections.sort(eList);
+		entityList.addAll(eList);
+		if (!entityList.isEmpty()) {
+			maxShowIndex = entityList.getLast().showIndex;
+		}
 	}
 
 	/**
@@ -136,6 +187,12 @@ public class BoardEntity {
 			focusedEntity = null;
 		} else {
 			entityList.remove(entity);
+		}
+		dataManager.deleteEntity(entity);
+		if (!entityList.isEmpty()) {
+			maxShowIndex = entityList.getLast().showIndex;
+		} else {
+			maxShowIndex = 0;
 		}
 		invalidateView();
 	}
@@ -190,10 +247,23 @@ public class BoardEntity {
 	public void addEntity() {
 		switch (mode) {
 		case MODE_NOTE:
-			entityList.add(new NoteEntity(this, context));
+			Entity noteEntity = new NoteEntity(this, context, -1, boardID, ++maxShowIndex,
+					totalOffsetX + 100, totalOffsetY + 100, 200, 300,
+					"", context.getResources().getColor(R.color.note_style_blue),
+					Color.BLACK, 20);
+			dataManager.saveData(noteEntity);
+			entityList.add(noteEntity);
 			break;
 		}
 		invalidateView();
+	}
+	
+	/**
+	 * 保存实体
+	 * @param entity
+	 */
+	public void saveEntity(Entity entity) {
+		dataManager.saveData(entity);
 	}
 	
 	/**

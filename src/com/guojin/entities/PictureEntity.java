@@ -16,7 +16,7 @@ import android.view.MotionEvent;
  * @author jinux
  * 
  */
-public class PictureEntity implements Entity {
+public class PictureEntity extends Entity {
 
 	@Override
 	public long getID() { return -1; }

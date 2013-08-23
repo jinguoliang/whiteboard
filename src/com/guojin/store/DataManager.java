@@ -8,6 +8,8 @@ import com.guojin.entities.Entity;
 import com.guojin.entities.NoteEntity;
 import com.guojin.entities.PictureEntity;
 import com.guojin.store.DatabaseContract.NoteDBEntity;
+import com.guojin.store.DatabaseContract.PathDBEntity;
+import com.guojin.store.DatabaseContract.PicDBEntity;
 
 public class DataManager {
 
@@ -18,6 +20,27 @@ public class DataManager {
 	public DataManager(Context c) {
 		context = c;
 		dbHelper = new DBHelper(c);
+		db = dbHelper.getWritableDatabase();
+	}
+	
+	/**
+	 * 获取用于检索所有Entity的Cursor
+	 * @param boardId
+	 * @return [0]:noteCursor [1]:picCursor [2]:pathCousor
+	 */
+	public Cursor[] getAllCursor(int boardId) {
+		
+		Cursor noteCursor = db.query(NoteDBEntity.TABLE_NAME, null, 
+				NoteDBEntity.BOARD_ID + "=?", new String[] {boardId + ""},
+				null, null, null);
+		Cursor picCursor = db.query(PicDBEntity.TABLE_NAME, null, 
+				PicDBEntity.BOARD_ID + "=?", new String[] {boardId + ""},
+				null, null, null);
+		Cursor pathCursor = db.query(PathDBEntity.TABLE_NAME, null, 
+				PathDBEntity.BOARD_ID + "=?", new String[] {boardId + ""},
+				null, null, null);
+		
+		return new Cursor[] {noteCursor, picCursor, pathCursor};
 	}
 	
 	/**
@@ -26,10 +49,10 @@ public class DataManager {
 	 */
 	public void saveData(Entity entity) {
 		long id = entity.getID();
-		db = dbHelper.getWritableDatabase();
+		
 		if (entity instanceof NoteEntity) {
 			if (id == -1) {
-				id = db.insert(NoteDBEntity.TABLE_NAME, null, entity.getContentValues());
+				id = db.insertOrThrow(NoteDBEntity.TABLE_NAME, null, entity.getContentValues());
 				entity.setID(id);
 			} else {
 				db.update(NoteDBEntity.TABLE_NAME, entity.getContentValues(),
@@ -39,8 +62,8 @@ public class DataManager {
 			
 		}
 		
-		db.close();
 	}
+	
 	
 	
 	/**
@@ -48,10 +71,18 @@ public class DataManager {
 	 * @param entity
 	 */
 	public void deleteEntity(Entity entity) {
+		
 		long id = entity.getID();
 		if (id != -1) {
 			db.delete(NoteDBEntity.TABLE_NAME,
 					NoteDBEntity._ID + "=?", new String[] {"" + id});
 		}
+	}
+	
+	/**
+	 * 关闭数据库连接
+	 */
+	public void closeDB() {
+		db.close();
 	}
 }

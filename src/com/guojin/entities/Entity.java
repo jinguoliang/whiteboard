@@ -4,27 +4,34 @@ import android.content.ContentValues;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 
-public interface Entity {
+public abstract class Entity implements Comparable<Entity> {
 	
 	/**
 	 * 绘制方法
 	 * @param canvas
 	 */
-	public void draw(Canvas canvas);
-	public void onEntityTouchEvent(MotionEvent event);
-	public int getType();
-	public boolean isInRange(float x, float y);
+	public abstract void draw(Canvas canvas);
+	public abstract void onEntityTouchEvent(MotionEvent event);
+	public abstract int getType();
+	public abstract boolean isInRange(float x, float y);
 	/**
 	 * 移除焦点
 	 */
-	public void removeFocus();
+	public abstract void removeFocus();
 	
 	/**
 	 * 获取需要存储的数据
 	 * @return
 	 */
-	public ContentValues getContentValues();
+	public abstract ContentValues getContentValues();
 	
-	public long getID();
-	public void setID(long id);
+	public abstract long getID();
+	public abstract void setID(long id);
+	
+	public int showIndex = -1;
+	
+	@Override
+	public int compareTo(Entity another) {
+		return Integer.valueOf(this.showIndex).compareTo(Integer.valueOf(another.showIndex));
+	}
 }

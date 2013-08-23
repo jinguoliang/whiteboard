@@ -19,7 +19,7 @@ import android.view.MotionEvent;
  * @author jinux
  *
  */
-public class PathEntity implements Entity {
+public class PathEntity extends Entity {
 	
 	@Override
 	public long getID() { return -1; }
