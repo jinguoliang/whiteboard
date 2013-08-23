@@ -1,7 +1,14 @@
 package com.guojin.entities;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.util.ArrayList;
 
+import android.R.array;
 import android.content.ContentValues;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -14,19 +21,25 @@ import android.graphics.Region;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.guojin.store.DatabaseContract.PathDBEntity;
+
 /**
  * 记录了一个path的相关信息,并且依据board的缩放对它进行缩放
+ * 
  * @author jinux
- *
+ * 
  */
 public class PathEntity extends Entity {
-	
+
 	@Override
-	public long getID() { return -1; }
-	
+	public long getID() {
+		return -1;
+	}
+
 	@Override
-	public void setID(long id) {  }
-	
+	public void setID(long id) {
+	}
+
 	private static final String TAG = "PathEntity";
 
 	BoardEntity board;
@@ -49,11 +62,11 @@ public class PathEntity extends Entity {
 	/**
 	 * 笔触的大小------------------------------------------------------- 存储
 	 */
-	private float paintSize;
+	private int paintSize;
 	/**
 	 * 原始点的数组-----------------------------存储
 	 */
-	private ArrayList<PointF> pathPointsList;
+	private ArrayList<float[]> pathPointsList;
 	/**
 	 * 笔触颜色-------------------------------------------------------------存储
 	 */
@@ -66,15 +79,15 @@ public class PathEntity extends Entity {
 	private float sy;
 
 	public PathEntity(BoardEntity b, Path path, Paint paint,
-			ArrayList<PointF> pointsList) {
+			ArrayList<float[]> pointsList) {
 		this.board = b;
 		this.originalScale = b.getTotalScale();
 		this.currentScale = originalScale;
 
 		this.pathPointsList = pointsList;
 		// 以点数组的第一个代表path的位置
-		this.sx = pointsList.get(0).x;
-		this.sy = pointsList.get(0).y;
+		this.sx = pointsList.get(0)[0];
+		this.sy = pointsList.get(0)[1];
 		// 转化为board上的位置
 		double xy[] = b.screenToBoardCoodTrans(this.sx, this.sy);
 		this.boardX = xy[0];
@@ -84,9 +97,52 @@ public class PathEntity extends Entity {
 		this.mPath = new Path(path);
 		this.mPaint = new Paint(paint);
 		this.color = mPaint.getColor();
-		this.paintSize = mPaint.getStrokeWidth();
+		this.paintSize = (int) (mPaint.getStrokeWidth() / b.getTotalScale());
 	}
 
+	public PathEntity(BoardEntity b, long id, int showIndex,
+			float originalScale, float currentScale, int color, int paintSize,
+			double bx, double by, byte[] pointsBuf) {
+		setID(id);
+		this.showIndex = showIndex;
+
+		this.board = b;
+		this.originalScale = originalScale;
+		this.currentScale = currentScale;
+		// 以点数组的第一个代表path的位置
+		this.boardX = bx;
+		this.boardY = by;
+		PointF p = b.boardToScreenCoodTrans(bx, by);
+		this.sx = p.x;
+		this.sy = p.y;
+
+		this.mPath = new Path();
+		try {
+			pathPointsList = byteToPoints(pointsBuf);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		this.mPath.moveTo(pathPointsList.get(0)[0], pathPointsList.get(0)[1]);
+		int i = 1;
+		for (int size=pathPointsList.size(); i <  size -1; i++) {
+			this.mPath.quadTo(pathPointsList.get(i - 1)[0],
+					pathPointsList.get(i - 1)[1], pathPointsList.get(i)[0],
+					pathPointsList.get(i)[1]);
+		}
+		this.mPath.lineTo(pathPointsList.get(i)[0], pathPointsList.get(i)[1]);
+
+		this.mMatrix = new Matrix();
+		this.mPaint = new Paint();
+		mPaint.setStyle(Paint.Style.STROKE);
+		mPaint.setAntiAlias(true);
+		mPaint.setStrokeCap(Paint.Cap.ROUND);
+		mPaint.setStrokeJoin(Paint.Join.ROUND);
+		this.color = color;
+		this.paintSize = paintSize;
+		mPaint.setColor(color);
+		mPaint.setStrokeWidth(paintSize);
+
+	}
 
 	PointF tmpScreenPoint;
 	double tmpScale;
@@ -170,7 +226,7 @@ public class PathEntity extends Entity {
 		Log.e(TAG, "list.size=" + list.size());
 		for (PointF p : list) {
 			float dist = distanceBetween(p, point);
-			if (dist - precision  < 0) {
+			if (dist - precision < 0) {
 				return true;
 			}
 		}
@@ -205,11 +261,40 @@ public class PathEntity extends Entity {
 		return (float) Math.sqrt(Math.pow(p1.x - p2.x, 2)
 				+ Math.pow(p1.y - p2.y, 2));
 	}
-	
+
 	@Override
 	public ContentValues getContentValues() {
-		// TODO Auto-generated method stub
-		return null;
+		ContentValues values = new ContentValues();
+		values.put(PathDBEntity.BOARD_ID, board.getBoardID());
+		values.put(PathDBEntity.SHOW_INDEX, showIndex + "");
+		values.put(PathDBEntity.POS_X, boardX);
+		values.put(PathDBEntity.POS_Y, boardY);
+
+		values.put(PathDBEntity.CUR_SCALE, this.currentScale);
+		values.put(PathDBEntity.ORI_SCALE, this.originalScale);
+		values.put(PathDBEntity.STROKE_COLOR, this.color);
+		values.put(PathDBEntity.STROKE_WIDTH, this.paintSize);
+		values.put(PathDBEntity.POINTS, getByteFromPoints());
+		return values;
+	}
+
+	private byte[] getByteFromPoints() {
+		ByteArrayOutputStream obj = new ByteArrayOutputStream();
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(obj);
+			out.writeObject(this.pathPointsList);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return obj.toByteArray();
+	}
+
+	private ArrayList<float[]> byteToPoints(byte[] buf)
+			throws OptionalDataException, ClassNotFoundException, IOException {
+		ByteArrayInputStream obj = new ByteArrayInputStream(buf);
+		ObjectInputStream in = new ObjectInputStream(obj);
+		return (ArrayList<float[]>) in.readObject();
 	}
 
 }

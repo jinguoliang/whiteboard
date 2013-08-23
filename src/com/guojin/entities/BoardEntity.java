@@ -5,7 +5,6 @@ import java.util.LinkedList;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,6 +14,7 @@ import android.view.MotionEvent;
 
 import com.guojin.store.DataManager;
 import com.guojin.store.DatabaseContract.NoteDBEntity;
+import com.guojin.store.DatabaseContract.PathDBEntity;
 import com.guojin.store.DatabaseContract.PicDBEntity;
 import com.guojin.whiteboard.BoardView;
 import com.guojin.whiteboard.R;
@@ -167,8 +167,35 @@ public class BoardEntity {
 				String src = picCursor.getString(picCursor
 						.getColumnIndexOrThrow(PicDBEntity.SRC));
 
-				eList.add(new PictureEntity(this, id, showIndex, src,
-						posX, posY, rotate, scale));
+				eList.add(new PictureEntity(this, id, showIndex, src, posX,
+						posY, rotate, scale));
+			}
+		}
+		// 加载path
+		if (pathCursor != null && pathCursor.moveToFirst()) {
+			for (pathCursor.moveToFirst(); !pathCursor.isAfterLast(); pathCursor
+					.moveToNext()) {
+				long id = pathCursor.getLong(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity._ID));
+				int showIndex = pathCursor.getInt(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.SHOW_INDEX));
+				double posX = pathCursor.getDouble(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.POS_X));
+				double posY = pathCursor.getDouble(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.POS_Y));
+				float curScale = pathCursor.getFloat(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.CUR_SCALE));
+				float orginalScale = pathCursor.getFloat(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.ORI_SCALE));
+				int paintColor = pathCursor.getInt(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.STROKE_COLOR));
+				int paintSize = pathCursor.getInt(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.STROKE_WIDTH));
+				byte[] points = pathCursor.getBlob(pathCursor
+						.getColumnIndexOrThrow(PathDBEntity.POINTS));
+
+				eList.add(new PathEntity(this, id, showIndex, orginalScale, curScale,
+						paintColor, paintSize, posX,posY,points));
 			}
 		}
 		// 加载笔触
@@ -576,7 +603,8 @@ public class BoardEntity {
 	 * @param b
 	 */
 	public void receivePicture(String fileName) {
-		Entity entity = new PictureEntity(this, fileName, picInsertX, picInsertY);
+		Entity entity = new PictureEntity(this, fileName, picInsertX,
+				picInsertY);
 		entityList.add(entity);
 		invalidateView();
 		dataManager.saveData(entity);
@@ -589,7 +617,7 @@ public class BoardEntity {
 	public int getBoardID() {
 		return boardID;
 	}
-	
+
 	public DataManager getDataManager() {
 		return dataManager;
 	}

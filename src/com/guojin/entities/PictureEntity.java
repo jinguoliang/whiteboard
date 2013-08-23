@@ -1,8 +1,5 @@
 package com.guojin.entities;
 
-import com.guojin.store.DatabaseContract.NoteDBEntity;
-import com.guojin.store.DatabaseContract.PicDBEntity;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,6 +11,8 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.Log;
 import android.view.MotionEvent;
+
+import com.guojin.store.DatabaseContract.PicDBEntity;
 
 /**
  * @author jinux
@@ -148,7 +147,7 @@ public class PictureEntity extends Entity {
 		this.centerYonBoard = y;
 		this.scale = scale;
 		this.rotate = rotate;
-		this.isFocused = true;
+		this.isFocused = false;
 		this.height = this.mBitmap.getHeight();
 		this.width =  this.mBitmap.getWidth();
 

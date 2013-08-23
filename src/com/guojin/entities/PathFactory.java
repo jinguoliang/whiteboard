@@ -1,7 +1,6 @@
 package com.guojin.entities;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Canvas;
@@ -9,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.util.Log;
 import android.view.MotionEvent;
 
 public class PathFactory {
@@ -38,7 +36,7 @@ public class PathFactory {
 
 	private Paint mPaint;
 	private Path cPath;
-	private float paitnWidth;
+	private int paintSize;
 	private int paintColor;
 
 	private BoardEntity board;
@@ -47,13 +45,13 @@ public class PathFactory {
 	/**
 	 * 记录画path时的每个点,以便存储恢复
 	 */
-	private ArrayList<PointF> pathPoints;
+	private ArrayList<float[]> pathPoints;
 
 	public PathFactory(BoardEntity b, List<Entity> list) {
 		this.entityList = list;
 		this.board = b;
 
-		paitnWidth = 10f;
+		paintSize = 10;
 		cPath = new Path();
 		mPaint = new Paint();
 		mPaint.setStyle(Paint.Style.STROKE);
@@ -81,18 +79,18 @@ public class PathFactory {
 	}
 
 	public void draw(Canvas canvas) {
-		mPaint.setStrokeWidth((float) (paitnWidth * board.getTotalScale()));
+		mPaint.setStrokeWidth((float) (paintSize * board.getTotalScale()));
 		mPaint.setColor(this.paintColor);
 		// 正在画但没画完的笔触
 		canvas.drawPath(cPath, mPaint);
 	}
 
 	private void touch_start(float x, float y) {
-		pathPoints = new ArrayList<PointF>();
+		pathPoints = new ArrayList<float[]>();
 		cPath.reset();
 		cPath.moveTo(x, y);
 		if (currentPathMode != PathFactory.PATH_MODE_ERASER) {
-			pathPoints.add(new PointF(x, y));
+			pathPoints.add(new float[] { x, y });
 		}
 		sX = x;
 		sY = y;
@@ -106,25 +104,27 @@ public class PathFactory {
 		if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
 			cPath.quadTo(sX, sY, (x + sX) / 2, (y + sY) / 2);
 			if (currentPathMode != PathFactory.PATH_MODE_ERASER) {
-				pathPoints.add(new PointF((x + sX) / 2, (y + sY) / 2));
+				pathPoints.add(new float[] { (x + sX) / 2, (y + sY) / 2 });
 			}
 			sX = x;
 			sY = y;
 		}
 	}
 
+	Entity tmp;
 	private void touch_up() {
 		cPath.lineTo(sX, sY);
 		// 当抬起时，如果不是橡皮,一个笔触结束，于是，将其画到mBitmap上，并添加到pathList上
 		if (currentPathMode != PathFactory.PATH_MODE_ERASER) {
-			pathPoints.add(new PointF(sX, sY));
-			entityList
-					.add(new PathEntity(this.board, cPath, mPaint, pathPoints));
+			pathPoints.add(new float[] { sX, sY });
+			 tmp = new PathEntity(this.board, cPath, mPaint, pathPoints);
+			entityList.add(tmp);
+			board.getDataManager().saveData(tmp);
 		} else {
 			ArrayList<PointF> list = PathEntity.getPointsArray(cPath);
 			List<Entity> tmplist = new ArrayList<Entity>();
 			for (PointF p : list) {
-				for (Entity entity:entityList) {
+				for (Entity entity : entityList) {
 					if (entity.getType() == BoardEntity.TYPE_PATH_ENTITY) {
 						if (((PathEntity) entity).containPoint(p)) {
 							tmplist.add(entity);
@@ -132,7 +132,7 @@ public class PathFactory {
 					}
 				}
 			}
-			for (Entity path:tmplist) {
+			for (Entity path : tmplist) {
 				entityList.remove(path);
 			}
 		}
@@ -145,7 +145,6 @@ public class PathFactory {
 		float x = event.getX();
 		float y = event.getY();
 
-	
 		// 判断action
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:// 刚按下
