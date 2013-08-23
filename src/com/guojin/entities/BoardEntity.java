@@ -603,7 +603,7 @@ public class BoardEntity {
 	 * @param b
 	 */
 	public void receivePicture(String fileName) {
-		Entity entity = new PictureEntity(this, fileName, picInsertX,
+		Entity entity = new PictureEntity(this, getMaxShowIndex(),fileName, picInsertX,
 				picInsertY);
 		entityList.add(entity);
 		invalidateView();
@@ -620,5 +620,8 @@ public class BoardEntity {
 
 	public DataManager getDataManager() {
 		return dataManager;
+	}
+	public int getMaxShowIndex() {
+		return ++maxShowIndex;
 	}
 }

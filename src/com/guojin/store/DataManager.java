@@ -3,6 +3,7 @@ package com.guojin.store;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.guojin.entities.Entity;
 import com.guojin.entities.NoteEntity;
@@ -14,6 +15,7 @@ import com.guojin.store.DatabaseContract.PicDBEntity;
 
 public class DataManager {
 
+	private static final String TAG = "DataManager";
 	Context context;
 	DBHelper dbHelper;
 	SQLiteDatabase db;
@@ -100,6 +102,7 @@ public class DataManager {
 		}
 		
 		long id = entity.getID();
+		Log.e(TAG,"id="+id);
 		if (id != -1) {
 			db.delete(tableName, NoteDBEntity._ID + "=?", new String[] { ""
 					+ id });

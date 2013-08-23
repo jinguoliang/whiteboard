@@ -31,13 +31,15 @@ import com.guojin.store.DatabaseContract.PathDBEntity;
  */
 public class PathEntity extends Entity {
 
+	long storeId=-1;
 	@Override
 	public long getID() {
-		return -1;
+		return storeId;
 	}
 
 	@Override
 	public void setID(long id) {
+		this.storeId=id;
 	}
 
 	private static final String TAG = "PathEntity";
@@ -78,12 +80,12 @@ public class PathEntity extends Entity {
 	private float sx;
 	private float sy;
 
-	public PathEntity(BoardEntity b, Path path, Paint paint,
+	public PathEntity(BoardEntity b,int showIndex, Path path, Paint paint,
 			ArrayList<float[]> pointsList) {
 		this.board = b;
 		this.originalScale = b.getTotalScale();
 		this.currentScale = originalScale;
-
+		this.showIndex =showIndex;
 		this.pathPointsList = pointsList;
 		// 以点数组的第一个代表path的位置
 		this.sx = pointsList.get(0)[0];

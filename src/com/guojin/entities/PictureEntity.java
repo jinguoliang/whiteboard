@@ -103,7 +103,7 @@ public class PictureEntity extends Entity {
 	final static int a_delete_handle = 6;
 	final static int a_out = 7;
 
-	public PictureEntity(BoardEntity board, Bitmap b, float x, float y) {
+	public PictureEntity(BoardEntity board,Bitmap b, float x, float y) {
 		this.boardEntity = board;
 		this.mBitmap = b;
 
@@ -128,9 +128,11 @@ public class PictureEntity extends Entity {
 		mMatrix = new Matrix();
 	}
 
-	public PictureEntity(BoardEntity board, String imageSrc, float x, float y) {
+	public PictureEntity(BoardEntity board,int showIndex, String imageSrc, float x, float y) {
 		this(board, BitmapFactory.decodeFile(imageSrc), x, y);
 		this.imageSrc=imageSrc;
+		this.showIndex=showIndex;
+
 	}
 
 	public PictureEntity(BoardEntity board, long id, int showIndex, String imageSrc,
