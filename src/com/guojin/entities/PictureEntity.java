@@ -139,7 +139,6 @@ public class PictureEntity extends Entity {
 			double x, double y, float rotate, float scale) {
 		this.boardEntity = board;
 		this.imageSrc=imageSrc;
-		Log.d(TAG,"file:"+imageSrc);
 		this.mBitmap =BitmapFactory.decodeFile(imageSrc);
 
 		// 初始化

@@ -506,7 +506,7 @@ public class WhiteBoardActivity extends Activity {
 				intent, 0);
 
 		int size = list.size();
-
+		Log.e(TAG,"crop list="+size);
 		if (size == 0) {
 			Toast.makeText(this, "Can not find image crop app",
 					Toast.LENGTH_SHORT).show();

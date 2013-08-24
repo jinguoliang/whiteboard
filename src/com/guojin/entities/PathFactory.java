@@ -112,12 +112,14 @@ public class PathFactory {
 	}
 
 	Entity tmp;
+
 	private void touch_up() {
 		cPath.lineTo(sX, sY);
 		// 当抬起时，如果不是橡皮,一个笔触结束，于是，将其画到mBitmap上，并添加到pathList上
 		if (currentPathMode != PathFactory.PATH_MODE_ERASER) {
 			pathPoints.add(new float[] { sX, sY });
-			 tmp = new PathEntity(this.board, board.getMaxShowIndex(),cPath, mPaint, pathPoints);
+			tmp = new PathEntity(this.board, board.getMaxShowIndex(), cPath,
+					paintSize, mPaint.getColor(), pathPoints);
 			entityList.add(tmp);
 			board.getDataManager().saveData(tmp);
 		} else {
