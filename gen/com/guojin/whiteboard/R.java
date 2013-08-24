@@ -37,8 +37,7 @@ public final class R {
         public static final int note_textsize_seek=0x7f02000c;
         public static final int note_textsize_thumb=0x7f02000d;
         public static final int subbar_bg=0x7f02000e;
-        public static final int test=0x7f02000f;
-        public static final int topbar_bg=0x7f020010;
+        public static final int topbar_bg=0x7f02000f;
     }
     public static final class id {
         public static final int board_framelayout=0x7f070000;
