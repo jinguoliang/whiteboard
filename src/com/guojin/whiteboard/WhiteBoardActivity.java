@@ -356,25 +356,26 @@ public class WhiteBoardActivity extends Activity {
 					}
 					return false;
 				}
-			} else if (boardEntity.mode == BoardEntity.MODE_PIC) {
-
-				if (!isOnePointAction) {
-					switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						firstTouchTime = new Date().getTime();
-						break;
-					case MotionEvent.ACTION_MOVE:
-						long curTouchTime = new Date().getTime();
-						if (curTouchTime - firstTouchTime > 100) {
-							isOnePointAction = true;
-							event.setAction(MotionEvent.ACTION_DOWN);
-							boardEntity.onEntityTouchEvent(event);
-						}
-						break;
-					}
-					return false;
-				}
 			}
+//			else if (boardEntity.mode == BoardEntity.MODE_PIC) {
+//
+//				if (!isOnePointAction) {
+//					switch (event.getAction()) {
+//					case MotionEvent.ACTION_DOWN:
+//						firstTouchTime = new Date().getTime();
+//						break;
+//					case MotionEvent.ACTION_MOVE:
+//						long curTouchTime = new Date().getTime();
+//						if (curTouchTime - firstTouchTime > 100) {
+//							isOnePointAction = true;
+//							event.setAction(MotionEvent.ACTION_DOWN);
+//							boardEntity.onEntityTouchEvent(event);
+//						}
+//						break;
+//					}
+//					return false;
+//				}
+//			}
 
 			boardEntity.onEntityTouchEvent(event);
 			if (event.getAction() == MotionEvent.ACTION_UP) {
