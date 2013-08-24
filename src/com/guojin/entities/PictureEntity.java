@@ -416,6 +416,7 @@ public class PictureEntity extends Entity {
 		} else {
 			setFocus(true);
 		}
+		onTouchMove(x, y, x, y);
 	}
 
 	/**
