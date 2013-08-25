@@ -108,9 +108,7 @@ public class PictureEntity extends Entity {
 		this.mBitmap = b;
 
 		// 初始化
-		double tmpXY[] = board.screenToBoardCoodTrans(x, y);
-		this.centerXonBoard = tmpXY[0];
-		this.centerYonBoard = tmpXY[1];
+		
 		this.scale = 1;
 		this.rotate = 0;
 		this.isFocused = false;
@@ -128,39 +126,41 @@ public class PictureEntity extends Entity {
 		mMatrix = new Matrix();
 	}
 
-	public PictureEntity(BoardEntity board,int showIndex, String imageSrc, float x, float y) {
-		this(board, BitmapFactory.decodeFile(imageSrc), x, y);
-		this.imageSrc=imageSrc;
-		this.showIndex=showIndex;
-
+	public PictureEntity(BoardEntity board,int showIndex, String imageSrc, float sx, float sy) {
+		this.boardEntity = board;
+		double tmpXY[] = board.screenToBoardCoodTrans(sx, sy);
+		initProperty(showIndex, imageSrc, tmpXY[0], tmpXY[1], 0, 1);
 	}
 
 	public PictureEntity(BoardEntity board, long id, int showIndex, String imageSrc,
 			double x, double y, float rotate, float scale) {
 		this.boardEntity = board;
-		this.imageSrc=imageSrc;
-		this.mBitmap =BitmapFactory.decodeFile(imageSrc);
-
-		// 初始化
 		setID(id);
-		this.showIndex = showIndex;
-		this.centerXonBoard = x;
-		this.centerYonBoard = y;
-		this.scale = scale;
-		this.rotate = rotate;
-		this.isFocused = false;
-		this.height = this.mBitmap.getHeight();
-		this.width =  this.mBitmap.getWidth();
+		initProperty(showIndex, imageSrc, x, y, rotate, scale);
+	}
+	
+	// 初始化
+	private void initProperty(int showIndex,String imageSrc,double bx,double by,float rotate,float scale) {
+				this.showIndex = showIndex;
+				this.centerXonBoard = bx;
+				this.centerYonBoard = by;
+				this.scale = scale;
+				this.rotate = rotate;
+				this.isFocused = false;
+				this.imageSrc=imageSrc;
+				this.mBitmap =BitmapFactory.decodeFile(imageSrc);
+				this.height = this.mBitmap.getHeight();
+				this.width =  this.mBitmap.getWidth();
 
-		boxPaint = new Paint();
-		boxPaint.setStyle(Paint.Style.STROKE);
-		boxPaint.setStrokeWidth(strokeWidth);
-		boxPaint.setColor(Color.RED);
-		boxPaint.setStrokeJoin(Paint.Join.ROUND);
-		boxPaint.setStrokeCap(Paint.Cap.ROUND);
-		boxPaint.setAntiAlias(true);
+				boxPaint = new Paint();
+				boxPaint.setStyle(Paint.Style.STROKE);
+				boxPaint.setStrokeWidth(strokeWidth);
+				boxPaint.setColor(Color.RED);
+				boxPaint.setStrokeJoin(Paint.Join.ROUND);
+				boxPaint.setStrokeCap(Paint.Cap.ROUND);
+				boxPaint.setAntiAlias(true);
 
-		mMatrix = new Matrix();
+				mMatrix = new Matrix();
 	}
 
 	/**
