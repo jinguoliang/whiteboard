@@ -28,7 +28,7 @@
                 android:layout_height="match_parent"
                 android:layout_width="30dp"
                 android:button="@null"
-                android:background="@drawable/handdraw_btn"
+                android:background="@drawable/pic_btn"
                 android:layout_marginRight="5dp" />
             <RadioButton android:id="@+id/mode_notedraw_btn"
                 android:layout_height="match_parent"
