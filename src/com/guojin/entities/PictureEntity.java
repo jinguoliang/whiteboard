@@ -103,29 +103,6 @@ public class PictureEntity extends Entity {
 	final static int a_delete_handle = 6;
 	final static int a_out = 7;
 
-	public PictureEntity(BoardEntity board,Bitmap b, float x, float y) {
-		this.boardEntity = board;
-		this.mBitmap = b;
-
-		// 初始化
-		
-		this.scale = 1;
-		this.rotate = 0;
-		this.isFocused = false;
-		this.height = b.getHeight();
-		this.width = b.getWidth();
-
-		boxPaint = new Paint();
-		boxPaint.setStyle(Paint.Style.STROKE);
-		boxPaint.setStrokeWidth(strokeWidth);
-		boxPaint.setColor(Color.RED);
-		boxPaint.setStrokeJoin(Paint.Join.ROUND);
-		boxPaint.setStrokeCap(Paint.Cap.ROUND);
-		boxPaint.setAntiAlias(true);
-
-		mMatrix = new Matrix();
-	}
-
 	public PictureEntity(BoardEntity board,int showIndex, String imageSrc, float sx, float sy) {
 		this.boardEntity = board;
 		double tmpXY[] = board.screenToBoardCoodTrans(sx, sy);

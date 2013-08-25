@@ -53,11 +53,11 @@ public class PathEntity extends Entity {
 	/**
 	 * 录path被添加到board上时board的缩放比例--------------存储
 	 */
-	double originalScale;
+	float originalScale;
 	/**
 	 * 当前board的比例,通过currentScale/orginalScale可求得path需要缩放的比例-- 存储
 	 */
-	double currentScale;
+	float currentScale;
 	/**
 	 * path在board上的位置---------------------------------------- 存储
 	 */
@@ -83,27 +83,39 @@ public class PathEntity extends Entity {
 
 	public PathEntity(BoardEntity b, int showIndex, Path path, int paintSize,
 			int color, ArrayList<float[]> pointsList) {
-		this.board = b;
-		this.originalScale = b.getTotalScale();
-		this.currentScale = originalScale;
-		this.showIndex = showIndex;
+
 		this.pathPointsList = pointsList;
 		// 以点数组的第一个代表path的位置
 		this.sx = pointsList.get(0)[0];
 		this.sy = pointsList.get(0)[1];
 		// 转化为board上的位置
 		double xy[] = b.screenToBoardCoodTrans(this.sx, this.sy);
-		this.boardX = xy[0];
-		this.boardY = xy[1];
+		this.boardX = (float) xy[0];
+		this.boardY = (float) xy[1];
+
+		initProperty(b, showIndex, (float) b.getTotalScale(),
+				(float) b.getTotalScale(), path, paintSize, color);
+
+	}
+
+	private void initProperty(BoardEntity b, int showIndex,
+			float originalScale, float curScale, Path path, int paintSize,
+			int color) {
+		this.board = b;
+		this.showIndex = showIndex;
+		this.originalScale = originalScale;
+		this.currentScale = curScale;
 
 		this.mMatrix = new Matrix();
 		this.mPath = new Path(path);
 
+		// 初始化paint
 		this.mPaint = new Paint();
 		mPaint.setStyle(Paint.Style.STROKE);
 		mPaint.setAntiAlias(true);
 		mPaint.setStrokeCap(Paint.Cap.ROUND);
 		mPaint.setStrokeJoin(Paint.Join.ROUND);
+
 		this.color = color;
 		this.paintSize = paintSize;
 		mPaint.setColor(color);
@@ -113,77 +125,71 @@ public class PathEntity extends Entity {
 	public PathEntity(BoardEntity b, long id, int showIndex,
 			float originalScale, float currentScale, int color, int paintSize,
 			double bx, double by, byte[] pointsBuf) {
-		setID(id);
-		this.showIndex = showIndex;
 
-		this.board = b;
-		this.originalScale = originalScale;
-		this.currentScale = currentScale;
-		// 以点数组的第一个代表path的位置
+		setID(id);
+
+		// board和屏幕上的坐标
 		this.boardX = bx;
 		this.boardY = by;
 		PointF p = b.boardToScreenCoodTrans(bx, by);
 		this.sx = p.x;
 		this.sy = p.y;
 
-		this.mPath = new Path();
+		// 构造path
+		Path path = new Path();
+		ArrayList<float[]> pointList = null;
 		try {
-			pathPointsList = byteToPoints(pointsBuf);
+			pointList = byteToPoints(pointsBuf);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		this.mPath.moveTo(pathPointsList.get(0)[0], pathPointsList.get(0)[1]);
+		path.moveTo(pointList.get(0)[0], pointList.get(0)[1]);
 		int i = 1;
 		float[] pre = null;
-		for (int size = pathPointsList.size(); i < size - 1; i++) {
-			pre = pathPointsList.get(i - 1);
-			this.mPath.quadTo(pre[0], pre[1],
-					(pathPointsList.get(i)[0] + pre[0]) / 2,
-					(pathPointsList.get(i)[1] + pre[1]) / 2);
+		for (int size = pointList.size(); i < size - 1; i++) {
+			pre = pointList.get(i - 1);
+			path.quadTo(pre[0], pre[1], (pointList.get(i)[0] + pre[0]) / 2,
+					(pointList.get(i)[1] + pre[1]) / 2);
 		}
-		this.mPath.lineTo(pathPointsList.get(i)[0], pathPointsList.get(i)[1]);
+		path.lineTo(pointList.get(i)[0], pointList.get(i)[1]);
 
-		this.mMatrix = new Matrix();
-		this.mPaint = new Paint();
-		mPaint.setStyle(Paint.Style.STROKE);
-		mPaint.setAntiAlias(true);
-		mPaint.setStrokeCap(Paint.Cap.ROUND);
-		mPaint.setStrokeJoin(Paint.Join.ROUND);
-		this.color = color;
-		this.paintSize = paintSize;
-		mPaint.setColor(color);
-		mPaint.setStrokeWidth(paintSize * currentScale);
+		initProperty(b, showIndex, originalScale, currentScale, path,
+				paintSize, color);
 
+		float originalSxy[] = pointList.get(0);
+		Log.e(TAG, "sx=" + sx + ",sy=" + sy);
+		Log.e(TAG, "ox=" + originalSxy[0] + ",oy=" + originalSxy[1]);
+		transform(currentScale / originalScale, sx - originalSxy[0], sy
+				- originalSxy[1]);
 	}
 
 	PointF tmpScreenPoint;
-	double tmpScale;
+	float tmpScale;
 
 	public void draw(Canvas canvas) {
 		// 获取现在的缩放比例
-		tmpScale = board.getTotalScale();
-		// 如果缩放比例变动则对矩阵进行缩放处理
-		if (Math.abs(currentScale - tmpScale) > 0) {
-			mMatrix.reset();
-			mMatrix.setScale((float) (tmpScale / currentScale),
-					(float) (tmpScale / currentScale), this.sx, this.sy);
-			mPath.transform(mMatrix);
-			currentScale = tmpScale;
-			mPaint.setStrokeWidth((float) (this.paintSize * currentScale));
-		}
-
-		// 如果位置发生变化,也对path进行平移变换
+		tmpScale = (float) board.getTotalScale();
 		tmpScreenPoint = board.boardToScreenCoodTrans(boardX, boardY);
-		if (Math.abs(sx - tmpScreenPoint.x) > 0
-				|| Math.abs(sy - tmpScreenPoint.y) > 0) {
-			mMatrix.reset();
-			mMatrix.setTranslate(tmpScreenPoint.x - sx, tmpScreenPoint.y - sy);
-			mPath.transform(mMatrix);
-			this.sx = tmpScreenPoint.x;
-			this.sy = tmpScreenPoint.y;
-		}
 
+		transform((float) (tmpScale / currentScale), tmpScreenPoint.x - sx,
+				tmpScreenPoint.y - sy);
+
+		currentScale = tmpScale;
+		this.sx = tmpScreenPoint.x;
+		this.sy = tmpScreenPoint.y;
+
+		mPaint.setStrokeWidth((float) (this.paintSize * currentScale));
 		canvas.drawPath(mPath, mPaint);
+	}
+
+	private void transform(float scale, float dx, float dy) {
+		Matrix mMatrix = new Matrix();
+		// 如果缩放比例变动则对矩阵进行缩放处理
+		mMatrix.setScale(scale, scale, this.sx, this.sy);
+		// 如果位置发生变化,也对path进行平移变换
+		mMatrix.postTranslate(dx, dy);
+		mPath.transform(mMatrix);
+
 	}
 
 	@Override
