@@ -123,7 +123,7 @@ public class PathFactory {
 			entityList.add(tmp);
 			board.getDataManager().saveData(tmp);
 		} else {
-			ArrayList<PointF> list = PathEntity.getPointsArray(cPath);
+			ArrayList<PointF> list = PathEntity.getPointsArray(cPath,PathEntity.precision);
 			List<Entity> tmplist = new ArrayList<Entity>();
 			for (PointF p : list) {
 				for (Entity entity : entityList) {

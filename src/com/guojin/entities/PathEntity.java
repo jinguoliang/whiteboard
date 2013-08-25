@@ -31,7 +31,8 @@ import com.guojin.store.DatabaseContract.PathDBEntity;
  */
 public class PathEntity extends Entity {
 
-	long storeId=-1;
+	long storeId = -1;
+
 	@Override
 	public long getID() {
 		return storeId;
@@ -39,7 +40,7 @@ public class PathEntity extends Entity {
 
 	@Override
 	public void setID(long id) {
-		this.storeId=id;
+		this.storeId = id;
 	}
 
 	private static final String TAG = "PathEntity";
@@ -80,12 +81,12 @@ public class PathEntity extends Entity {
 	private float sx;
 	private float sy;
 
-	public PathEntity(BoardEntity b,int showIndex, Path path, int paintSize,int color,
-			ArrayList<float[]> pointsList) {
+	public PathEntity(BoardEntity b, int showIndex, Path path, int paintSize,
+			int color, ArrayList<float[]> pointsList) {
 		this.board = b;
 		this.originalScale = b.getTotalScale();
 		this.currentScale = originalScale;
-		this.showIndex =showIndex;
+		this.showIndex = showIndex;
 		this.pathPointsList = pointsList;
 		// 以点数组的第一个代表path的位置
 		this.sx = pointsList.get(0)[0];
@@ -97,7 +98,7 @@ public class PathEntity extends Entity {
 
 		this.mMatrix = new Matrix();
 		this.mPath = new Path(path);
-		
+
 		this.mPaint = new Paint();
 		mPaint.setStyle(Paint.Style.STROKE);
 		mPaint.setAntiAlias(true);
@@ -106,7 +107,7 @@ public class PathEntity extends Entity {
 		this.color = color;
 		this.paintSize = paintSize;
 		mPaint.setColor(color);
-		mPaint.setStrokeWidth((float) (paintSize*originalScale));
+		mPaint.setStrokeWidth((float) (paintSize * originalScale));
 	}
 
 	public PathEntity(BoardEntity b, long id, int showIndex,
@@ -133,10 +134,12 @@ public class PathEntity extends Entity {
 		}
 		this.mPath.moveTo(pathPointsList.get(0)[0], pathPointsList.get(0)[1]);
 		int i = 1;
-		for (int size=pathPointsList.size(); i <  size -1; i++) {
-			this.mPath.quadTo(pathPointsList.get(i - 1)[0],
-					pathPointsList.get(i - 1)[1], pathPointsList.get(i)[0],
-					pathPointsList.get(i)[1]);
+		float[] pre = null;
+		for (int size = pathPointsList.size(); i < size - 1; i++) {
+			pre = pathPointsList.get(i - 1);
+			this.mPath.quadTo(pre[0], pre[1],
+					(pathPointsList.get(i)[0] + pre[0]) / 2,
+					(pathPointsList.get(i)[1] + pre[1]) / 2);
 		}
 		this.mPath.lineTo(pathPointsList.get(i)[0], pathPointsList.get(i)[1]);
 
@@ -149,7 +152,7 @@ public class PathEntity extends Entity {
 		this.color = color;
 		this.paintSize = paintSize;
 		mPaint.setColor(color);
-		mPaint.setStrokeWidth(paintSize*currentScale);
+		mPaint.setStrokeWidth(paintSize * currentScale);
 
 	}
 
@@ -231,7 +234,7 @@ public class PathEntity extends Entity {
 	 * @return
 	 */
 	public boolean containPoint(PointF point) {
-		ArrayList<PointF> list = getPointsArray(mPath);
+		ArrayList<PointF> list = getPointsArray(mPath, precision);
 		Log.e(TAG, "list.size=" + list.size());
 		for (PointF p : list) {
 			float dist = distanceBetween(p, point);
@@ -247,7 +250,7 @@ public class PathEntity extends Entity {
 	 * 
 	 * @return
 	 */
-	static ArrayList<PointF> getPointsArray(Path mPath) {
+	static ArrayList<PointF> getPointsArray(Path mPath, float precision) {
 		ArrayList<PointF> list = new ArrayList<PointF>();
 		PathMeasure pm = new PathMeasure(mPath, false);
 		float[] coords = null;
