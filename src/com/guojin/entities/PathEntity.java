@@ -80,7 +80,7 @@ public class PathEntity extends Entity {
 	private float sx;
 	private float sy;
 
-	public PathEntity(BoardEntity b,int showIndex, Path path, Paint paint,
+	public PathEntity(BoardEntity b,int showIndex, Path path, int paintSize,int color,
 			ArrayList<float[]> pointsList) {
 		this.board = b;
 		this.originalScale = b.getTotalScale();
@@ -97,9 +97,16 @@ public class PathEntity extends Entity {
 
 		this.mMatrix = new Matrix();
 		this.mPath = new Path(path);
-		this.mPaint = new Paint(paint);
-		this.color = mPaint.getColor();
-		this.paintSize = (int) (mPaint.getStrokeWidth() / b.getTotalScale());
+		
+		this.mPaint = new Paint();
+		mPaint.setStyle(Paint.Style.STROKE);
+		mPaint.setAntiAlias(true);
+		mPaint.setStrokeCap(Paint.Cap.ROUND);
+		mPaint.setStrokeJoin(Paint.Join.ROUND);
+		this.color = color;
+		this.paintSize = paintSize;
+		mPaint.setColor(color);
+		mPaint.setStrokeWidth((float) (paintSize*originalScale));
 	}
 
 	public PathEntity(BoardEntity b, long id, int showIndex,
@@ -142,7 +149,7 @@ public class PathEntity extends Entity {
 		this.color = color;
 		this.paintSize = paintSize;
 		mPaint.setColor(color);
-		mPaint.setStrokeWidth(paintSize);
+		mPaint.setStrokeWidth(paintSize*currentScale);
 
 	}
 
@@ -159,7 +166,7 @@ public class PathEntity extends Entity {
 					(float) (tmpScale / currentScale), this.sx, this.sy);
 			mPath.transform(mMatrix);
 			currentScale = tmpScale;
-			mPaint.setStrokeWidth((float) (this.paintSize * currentScale / originalScale));
+			mPaint.setStrokeWidth((float) (this.paintSize * currentScale));
 		}
 
 		// 如果位置发生变化,也对path进行平移变换

@@ -87,6 +87,7 @@ public class WhiteBoardActivity extends Activity {
 
 	// 记录切换到橡皮模式前笔触的模式
 	private int oldPaintMode = PathFactory.PATH_MODE_PAINT;
+	private AlertDialog picDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -356,25 +357,26 @@ public class WhiteBoardActivity extends Activity {
 					}
 					return false;
 				}
-			} else if (boardEntity.mode == BoardEntity.MODE_PIC) {
-
-				if (!isOnePointAction) {
-					switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						firstTouchTime = new Date().getTime();
-						break;
-					case MotionEvent.ACTION_MOVE:
-						long curTouchTime = new Date().getTime();
-						if (curTouchTime - firstTouchTime > 100) {
-							isOnePointAction = true;
-							event.setAction(MotionEvent.ACTION_DOWN);
-							boardEntity.onEntityTouchEvent(event);
-						}
-						break;
-					}
-					return false;
-				}
 			}
+//			else if (boardEntity.mode == BoardEntity.MODE_PIC) {
+//
+//				if (!isOnePointAction) {
+//					switch (event.getAction()) {
+//					case MotionEvent.ACTION_DOWN:
+//						firstTouchTime = new Date().getTime();
+//						break;
+//					case MotionEvent.ACTION_MOVE:
+//						long curTouchTime = new Date().getTime();
+//						if (curTouchTime - firstTouchTime > 100) {
+//							isOnePointAction = true;
+//							event.setAction(MotionEvent.ACTION_DOWN);
+//							boardEntity.onEntityTouchEvent(event);
+//						}
+//						break;
+//					}
+//					return false;
+//				}
+//			}
 
 			boardEntity.onEntityTouchEvent(event);
 			if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -383,6 +385,10 @@ public class WhiteBoardActivity extends Activity {
 		}
 
 		if (!isOnePointAction && pointerCount == 2) {
+			//如果图片选择dialog正在显示则关掉它
+			if (picDialog!=null&&picDialog.isShowing()) {
+				picDialog.dismiss();
+			}
 			switch (event.getActionMasked()) {
 			case MotionEvent.ACTION_MOVE:
 
@@ -467,7 +473,7 @@ public class WhiteBoardActivity extends Activity {
 
 	public void loadPicture() {
 		CharSequence[] items = { "相册", "相机" };
-		new AlertDialog.Builder(this).setTitle("选择图片来源")
+		picDialog=new AlertDialog.Builder(this).setTitle("选择图片来源")
 				.setItems(items, new AlertDialog.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						tmpPicFile = new File(FileStore.picDir
@@ -495,7 +501,8 @@ public class WhiteBoardActivity extends Activity {
 							startActivityForResult(intent, SELECT_CAMER);
 						}
 					}
-				}).create().show();
+				}).create();
+		picDialog.show();
 	}
 
 	private void doCrop() {
@@ -506,7 +513,7 @@ public class WhiteBoardActivity extends Activity {
 				intent, 0);
 
 		int size = list.size();
-
+		Log.e(TAG,"crop list="+size);
 		if (size == 0) {
 			Toast.makeText(this, "Can not find image crop app",
 					Toast.LENGTH_SHORT).show();
