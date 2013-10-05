@@ -16,6 +16,8 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.guojin.entities.BoardEntity;
 
+
+
 public class BoardView extends View {
 
 	private Canvas bufCanvas;
