@@ -93,6 +93,8 @@ public class PictureEntity extends Entity {
 
 	private String imageSrc;
 
+	private Paint picturePaint;
+
 	// 触摸位置标记
 	final static int a_left_top = 0;
 	final static int a_right_top = 1;
@@ -136,6 +138,9 @@ public class PictureEntity extends Entity {
 				boxPaint.setStrokeJoin(Paint.Join.ROUND);
 				boxPaint.setStrokeCap(Paint.Cap.ROUND);
 				boxPaint.setAntiAlias(true);
+				
+				picturePaint = new Paint();
+				picturePaint.setAntiAlias(true);
 
 				mMatrix = new Matrix();
 	}
@@ -291,11 +296,9 @@ public class PictureEntity extends Entity {
 	}
 
 	private void drawBitmap(Canvas c) {
-		Paint p = new Paint();
-		p.setAntiAlias(true);
 		transformBitmapMatrix();
 		if (mBitmap != null) {
-			c.drawBitmap(mBitmap, mMatrix, p);
+			c.drawBitmap(mBitmap, mMatrix, picturePaint);
 		}
 	}
 
