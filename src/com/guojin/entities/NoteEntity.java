@@ -90,12 +90,12 @@ public class NoteEntity extends Entity {
 	private String text;
 	private int textColor;
 	
-	private int boardID;
+	private long boardID;
 	
 	// 文本字间距
 	private double textSpan = 1;
 	
-	public NoteEntity(BoardEntity be, Context c, long id, int boardID, int showIndex, 
+	public NoteEntity(BoardEntity be, Context c, long id, long boardID, int showIndex, 
 			double posX, double posY, double width, double height, 
 			String text, int bgColor, int textColor, float textSize) {
 		

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/board_list_item_bg">
+        
+        <ImageView android:id="@+id/board_item_img"
+            android:contentDescription="aaa"
+            android:layout_height="60dp"
+            android:layout_width="60dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/ic_launcher"/>
+        
+        <LinearLayout android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            
+            <TextView android:id="@+id/board_item_title"
+	        	android:layout_width="match_parent"
+	        	android:layout_height="wrap_content"
+	        	android:textColor="#333333"
+	        	android:textSize="22sp" />
+            
+            <TextView android:id="@+id/board_item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp" />
+            
+        </LinearLayout>
+        
+        <Button android:id="@+id/board_item_more_btn"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="More"/>
+        
+    </LinearLayout>
+    
+    
+    <LinearLayout android:id="@+id/board_item_edit_layout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:visibility="gone"
+        android:gravity="right"
+        android:background="#AAAAAA"
+        android:orientation="horizontal">
+        
+        <Button android:id="@+id/board_item_edit_btn"
+            android:layout_height="fill_parent"
+            android:layout_width="100dp"
+            android:background="@drawable/board_list_item_sub_btn_bg"
+            android:text="Edit"/>
+        
+        <Button android:id="@+id/board_item_delete_btn"
+            android:layout_height="fill_parent"
+            android:layout_width="100dp"
+            android:background="@drawable/board_list_item_sub_btn_bg"
+            android:text="Delete"/>
+        
+    </LinearLayout>
+
+</LinearLayout>

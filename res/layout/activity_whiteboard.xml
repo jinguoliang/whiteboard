@@ -34,8 +34,20 @@
                 android:layout_height="match_parent"
                 android:layout_width="30dp"
                 android:button="@null"
-                android:background="@drawable/handdraw_btn" />
+                android:background="@drawable/note_btn" />
         </RadioGroup>
+        
+        <Button android:id="@+id/clear_paper_btn"
+            android:layout_height="match_parent"
+            android:layout_width="30dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/clear_paper_btn"/>
+        
+        <Button android:id="@+id/paperbg_btn"
+            android:layout_height="match_parent"
+            android:layout_width="30dp"
+            android:layout_toLeftOf="@id/clear_paper_btn"
+            android:background="@drawable/change_paperbg_btn"/>
         
     </RelativeLayout>
 	
@@ -57,7 +69,7 @@
             android:layout_marginRight="5dp"
             android:textOn=""
             android:textOff=""
-            android:background="@drawable/handdraw_btn"/>
+            android:background="@drawable/stroke_btn"/>
         
         <!-- 笔触颜色按钮 -->
         <ToggleButton android:id="@+id/handraw_conf_color_btn"
@@ -66,7 +78,7 @@
             android:layout_marginRight="5dp"
             android:textOn=""
             android:textOff=""
-            android:background="@drawable/handdraw_btn"/>
+            android:background="@drawable/drawcolor_btn"/>
         
         <!-- 橡皮按钮 -->
         <ToggleButton android:id="@+id/handraw_conf_eraser_btn"
@@ -75,12 +87,13 @@
             android:layout_marginRight="5dp"
             android:textOn=""
             android:textOff=""
-            android:background="@drawable/handdraw_btn"/>
+            android:background="@drawable/eraser_btn"/>
         
     </LinearLayout>
     
     <!-- 手绘模式底部粗细参数选择条 -->
     <RadioGroup android:id="@+id/handraw_width_group"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_gravity="bottom"
@@ -142,7 +155,7 @@
             android:layout_marginRight="5dp"
             android:textOn=""
             android:textOff=""
-            android:background="@drawable/handdraw_btn"/>
+            android:background="@drawable/drawcolor_btn"/>
         
         <ToggleButton android:id="@+id/note_conf_textsize_btn"
             android:layout_width="30dp"
@@ -150,13 +163,13 @@
             android:layout_marginRight="5dp"
             android:textOn=""
             android:textOff=""
-            android:background="@drawable/handdraw_btn"/>
+            android:background="@drawable/textsize_btn"/>
         
         <Button android:id="@+id/note_add_new"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginRight="5dp"
-            android:background="@drawable/handdraw_btn"/>
+            android:background="@drawable/addnote_btn"/>
     </LinearLayout>
     
     <!-- 便签模式底部样式参数选择条 -->

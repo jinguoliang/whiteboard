@@ -19,6 +19,7 @@ public class DatabaseContract {
 	 */
 	public static abstract class BoardDBEntity implements BaseColumns {
 		public static final String TABLE_NAME = "notetable";
+		public static final String NAME = "name";
 		public static final String MTIME = "mtime";
 		public static final String CTIME = "ctime";
 		public static final String THUMB_SRC = "thumb_src";
@@ -29,6 +30,7 @@ public class DatabaseContract {
 		// 创建语句
 		public static final String SQL_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
 				_ID + " INTEGER PRIMARY KEY," +
+				NAME + "Text, " +
 				MTIME + " DATETIME," +
 				CTIME + " DATETIME," +
 				THUMB_SRC + " TEXT," +

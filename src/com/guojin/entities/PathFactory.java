@@ -121,7 +121,7 @@ public class PathFactory {
 			tmp = new PathEntity(this.board, board.getMaxShowIndex(), cPath,
 					paintSize, mPaint.getColor(), pathPoints);
 			entityList.add(tmp);
-			board.getDataManager().saveData(tmp);
+			board.getDataManager().saveEntityData(tmp);
 		} else {
 			ArrayList<PointF> list = PathEntity.getPointsArray(cPath,PathEntity.precision);
 			List<Entity> tmplist = new ArrayList<Entity>();

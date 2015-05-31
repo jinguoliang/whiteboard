@@ -1,10 +1,13 @@
 package com.guojin.entities;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +17,7 @@ import android.graphics.RectF;
 import android.view.MotionEvent;
 
 import com.guojin.store.DataManager;
+import com.guojin.store.DatabaseContract.BoardDBEntity;
 import com.guojin.store.DatabaseContract.NoteDBEntity;
 import com.guojin.store.DatabaseContract.PathDBEntity;
 import com.guojin.store.DatabaseContract.PicDBEntity;
@@ -24,7 +28,11 @@ import com.guojin.whiteboard.common.PhoneUtils;
 
 public class BoardEntity {
 
-	private int boardID = 1;
+	public long boardID = -1;
+	public String name = "新建文档";
+	public long mTime;
+	public long cTime;
+	public String thumb_src;		// 缩略图
 
 	// 模式常量
 	public static final int MODE_HANDDRAW = 0x11;
@@ -119,7 +127,7 @@ public class BoardEntity {
 	 * 加载实体
 	 */
 	private void loadEntity() {
-		Cursor[] cursors = dataManager.getAllCursor(boardID);
+		Cursor[] cursors = dataManager.getAllEntitysCursor(boardID);
 		Cursor noteCursor = cursors[0];
 		Cursor picCursor = cursors[1];
 		Cursor pathCursor = cursors[2];
@@ -321,10 +329,10 @@ public class BoardEntity {
 		switch (mode) {
 		case MODE_NOTE:
 			Entity noteEntity = new NoteEntity(this, context, -1, boardID,
-					++maxShowIndex, totalOffsetX + 100, totalOffsetY + 100,
+					++maxShowIndex, -totalOffsetX + 200, -totalOffsetY + 200,
 					200, 300, "", context.getResources().getColor(
 							R.color.note_style_blue), Color.BLACK, 20);
-			dataManager.saveData(noteEntity);
+			dataManager.saveEntityData(noteEntity);
 			entityList.add(noteEntity);
 			break;
 		}
@@ -332,12 +340,28 @@ public class BoardEntity {
 	}
 
 	/**
+	 * 获取用于存储的ContentValues
+	 * @return
+	 */
+	public ContentValues getContentValues() {
+		ContentValues values = new ContentValues();
+		values.put(BoardDBEntity.NAME, name);
+		values.put(BoardDBEntity.MTIME, new Date().getDate());
+		values.put(BoardDBEntity.CTIME, cTime);
+		values.put(BoardDBEntity.THUMB_SRC, thumb_src);
+		values.put(BoardDBEntity.OFF_X, totalOffsetX);
+		values.put(BoardDBEntity.OFF_Y, totalOffsetY);
+		values.put(BoardDBEntity.SCALE, totalScale);
+		return values;
+	}
+	
+	/**
 	 * 保存实体
 	 * 
 	 * @param entity
 	 */
 	public void saveEntity(Entity entity) {
-		dataManager.saveData(entity);
+		dataManager.saveEntityData(entity);
 	}
 
 	/**
@@ -618,14 +642,14 @@ public class BoardEntity {
 				picInsertY);
 		entityList.add(entity);
 		invalidateView();
-		dataManager.saveData(entity);
+		dataManager.saveEntityData(entity);
 	}
 
 	public PathFactory getPathFactory() {
 		return this.pathFactory;
 	}
 
-	public int getBoardID() {
+	public long getBoardID() {
 		return boardID;
 	}
 

@@ -586,7 +586,7 @@ public class PictureEntity extends Entity {
 			}
 			break;
 		case MotionEvent.ACTION_UP:
-			boardEntity.getDataManager().saveData(this);
+			boardEntity.getDataManager().saveEntityData(this);
 			break;
 		}
 	}
