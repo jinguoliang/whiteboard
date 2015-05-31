@@ -1,10 +1,13 @@
 package com.guojin.whiteboard;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
+import android.os.Build;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -15,6 +18,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 
 import com.guojin.entities.BoardEntity;
+import com.guojin.whiteboard.common.PhoneUtils;
 
 
 
@@ -34,6 +38,7 @@ public class BoardView extends View {
 		super(context);
 	}
 	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 	public BoardView(Context context, BoardEntity board) {
 		this(context);
 		
@@ -41,10 +46,11 @@ public class BoardView extends View {
 		
 		// 设置双缓冲
 		int screenWidth, screenHeight;
-		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		Display display = wm.getDefaultDisplay();
-		screenWidth = display.getWidth();
-		screenHeight = display.getHeight();
+
+		Point p = new Point();
+		PhoneUtils.getScreenSize(context, p);
+		screenWidth = p.x;
+		screenHeight = p.y;
 		bufBitmap = Bitmap.createBitmap(screenWidth, screenHeight, Config.ARGB_8888);
 		bufCanvas = new Canvas(bufBitmap);
 		

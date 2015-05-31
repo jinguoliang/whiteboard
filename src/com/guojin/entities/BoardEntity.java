@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.view.MotionEvent;
@@ -19,6 +20,7 @@ import com.guojin.store.DatabaseContract.PicDBEntity;
 import com.guojin.whiteboard.BoardView;
 import com.guojin.whiteboard.R;
 import com.guojin.whiteboard.WhiteBoardActivity;
+import com.guojin.whiteboard.common.PhoneUtils;
 
 public class BoardEntity {
 
@@ -85,6 +87,9 @@ public class BoardEntity {
 	private DataManager dataManager;
 	// 显示顺序索引的最大值
 	private int maxShowIndex = 0;
+	//
+	private float mWidth;
+	private float mHeight;
 
 	/**
 	 * 构造函数
@@ -94,6 +99,11 @@ public class BoardEntity {
 		context = c;
 		dataManager = new DataManager(c);
 
+		Point p = new Point();
+		PhoneUtils.getScreenSize(context, p);
+		mWidth = p.x;
+		mHeight = p.y;
+		
 		// 初始化画笔
 		coverPaint.setAntiAlias(true);
 		coverPaint.setColor(Color.argb(150, 200, 200, 200));
@@ -266,7 +276,8 @@ public class BoardEntity {
 		// 绘制纸张背景
 		paperEntity.draw(canvas);
 
-		canvas.saveLayer(0, 0, 800, 800, null, Canvas.ALL_SAVE_FLAG);
+		
+		canvas.saveLayer(0, 0, mWidth, mHeight, null, Canvas.ALL_SAVE_FLAG);
 		for (Entity e : entityList) {
 			e.draw(canvas);
 		}
